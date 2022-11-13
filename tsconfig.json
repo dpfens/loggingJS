@@ -10,7 +10,7 @@
         ],
         "sourceRoot": "./src/",
         "rootDir": "./src/",
-        "outFile": "dist/main.js",
+        "outFile": "dist/logging.js",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
