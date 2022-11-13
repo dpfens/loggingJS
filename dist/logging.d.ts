@@ -4,6 +4,7 @@ interface DataCollector {
 interface LogEntryMetadata {
     timestamp: Date;
     type: string;
+    environment: string;
     data: any;
 }
 interface BaseLogEntry {
@@ -44,7 +45,7 @@ declare namespace Logging {
         export class RESTHandler implements EntryHandler {
             protected readonly endpoint: string;
             protected readonly method: string;
-            constructor(endpoint: string, method: string);
+            constructor(endpoint: string, options?: any);
             static isSupported(): boolean;
             handleFetch(entry: BaseLogEntry): Promise<any>;
             handleXMLHTTPRequest(entry: BaseLogEntry): void;
@@ -58,6 +59,8 @@ declare namespace Logging {
         class BaseLogger {
             protected readonly collectors: Record<string, DataCollector>;
             protected readonly handlers: Array<EntryHandler>;
+            LOGENTRYTYPE: string;
+            static DEFAULTCOLLECTORS: Record<string, DataCollector>;
             constructor(options?: any);
             protected toArray(iterable: any): Array<any>;
             protected collect(): any;
@@ -80,6 +83,7 @@ declare namespace Logging {
             groupEnd(): void;
         }
         class EventLogger extends BaseLogger implements EventLogger {
+            LOGENTRYTYPE: string;
             constructor(options?: any);
             stringifyEvent(event: Event): string;
             handle(event: Event): boolean;

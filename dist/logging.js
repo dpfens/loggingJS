@@ -116,14 +116,16 @@ var Logging;
     var handler;
     (function (handler) {
         var RESTHandler = (function () {
-            function RESTHandler(endpoint, method) {
+            function RESTHandler(endpoint, options) {
                 this.endpoint = endpoint;
-                this.method = method;
+                options = options || {};
+                this.method = options.method || 'POST';
             }
             RESTHandler.isSupported = function () {
                 return true;
             };
             RESTHandler.prototype.handleFetch = function (entry) {
+                console.log(entry);
                 return fetch(this.endpoint, {
                     method: this.method,
                     headers: {
@@ -150,6 +152,20 @@ var Logging;
             return RESTHandler;
         }());
         handler.RESTHandler = RESTHandler;
+        var HTMLHandler = (function () {
+            function HTMLHandler(element) {
+                this.element = element;
+            }
+            HTMLHandler.prototype.render = function (entry) {
+                var output = '';
+                return output;
+            };
+            HTMLHandler.prototype.handle = function (entry) {
+                this.element.innerHTML += this.render(entry);
+                return true;
+            };
+            return HTMLHandler;
+        }());
     })(handler = Logging.handler || (Logging.handler = {}));
 })(Logging || (Logging = {}));
 var Logging;
@@ -158,12 +174,9 @@ var Logging;
     (function (logger) {
         var BaseLogger = (function () {
             function BaseLogger(options) {
+                this.LOGENTRYTYPE = 'Log';
                 options = options || {};
-                this.collectors = options.collectors || {
-                    'navigation': new Logging.collector.NavigationCollector(),
-                    'screen': new Logging.collector.ScreenCollector(),
-                    'performance': new Logging.collector.PerformanceCollector()
-                };
+                this.collectors = options.collectors || BaseLogger.DEFAULTCOLLECTORS;
                 this.handlers = options.handlers || [];
             }
             BaseLogger.prototype.toArray = function (iterable) {
@@ -185,7 +198,8 @@ var Logging;
                 return {
                     timestamp: new Date,
                     data: this.collect(),
-                    type: 'Browser'
+                    type: this.LOGENTRYTYPE,
+                    environment: window ? 'Browser' : 'NodeJS'
                 };
             };
             BaseLogger.prototype.executeHandlers = function (entry) {
@@ -201,6 +215,11 @@ var Logging;
                     }
                 }
                 return success;
+            };
+            BaseLogger.DEFAULTCOLLECTORS = {
+                'navigation': new Logging.collector.NavigationCollector(),
+                'screen': new Logging.collector.ScreenCollector(),
+                'performance': new Logging.collector.PerformanceCollector()
             };
             return BaseLogger;
         }());
@@ -223,6 +242,7 @@ var Logging;
                     metadata: this.gatherMetadata()
                 };
                 this.entries.push(entry);
+                this.executeHandlers(entry);
             };
             Logger.prototype.clear = function () {
                 var entry = {
@@ -231,6 +251,7 @@ var Logging;
                     metadata: this.gatherMetadata()
                 };
                 this.entries.push(entry);
+                this.executeHandlers(entry);
             };
             Logger.prototype.debug = function () {
                 var entry = {
@@ -239,6 +260,7 @@ var Logging;
                     metadata: this.gatherMetadata()
                 };
                 this.entries.push(entry);
+                this.executeHandlers(entry);
             };
             Logger.prototype.error = function () {
                 var entry = {
@@ -247,6 +269,7 @@ var Logging;
                     metadata: this.gatherMetadata()
                 };
                 this.entries.push(entry);
+                this.executeHandlers(entry);
             };
             Logger.prototype.info = function () {
                 var entry = {
@@ -255,6 +278,7 @@ var Logging;
                     metadata: this.gatherMetadata()
                 };
                 this.entries.push(entry);
+                this.executeHandlers(entry);
             };
             Logger.prototype.log = function () {
                 var entry = {
@@ -263,6 +287,7 @@ var Logging;
                     metadata: this.gatherMetadata()
                 };
                 this.entries.push(entry);
+                this.executeHandlers(entry);
             };
             Logger.prototype.warn = function () {
                 var entry = {
@@ -271,6 +296,7 @@ var Logging;
                     metadata: this.gatherMetadata()
                 };
                 this.entries.push(entry);
+                this.executeHandlers(entry);
             };
             Logger.prototype.group = function () {
                 var entry = {
@@ -279,6 +305,7 @@ var Logging;
                     metadata: this.gatherMetadata()
                 };
                 this.entries.push(entry);
+                this.executeHandlers(entry);
                 if (arguments.length > 0) {
                     var groupLabel = arguments[0];
                     this.groups.push(groupLabel);
@@ -291,6 +318,7 @@ var Logging;
                     metadata: this.gatherMetadata()
                 };
                 this.entries.push(entry);
+                this.executeHandlers(entry);
                 this.groups.pop();
             };
             return Logger;
@@ -300,6 +328,7 @@ var Logging;
             __extends(EventLogger, _super);
             function EventLogger(options) {
                 var _this = _super.call(this, options) || this;
+                _this.LOGENTRYTYPE = 'Event';
                 _this.handle = _this.handle.bind(_this);
                 return _this;
             }
