@@ -10,9 +10,10 @@ namespace Logging {
       protected readonly endpoint: string;
       protected readonly method: string;
 
-      constructor(endpoint: string, method: string) {
+      constructor(endpoint: string, options?: any) {
         this.endpoint = endpoint;
-        this.method = method;
+        options = options || {};
+        this.method = options.method || 'POST';
       }
 
       static isSupported(): boolean {
