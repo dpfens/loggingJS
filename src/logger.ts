@@ -82,6 +82,7 @@ namespace Logging {
             metadata: this.gatherMetadata()
           };
         this.entries.push(entry);
+        this.executeHandlers(entry);
       }
 
       public clear() {
@@ -91,6 +92,7 @@ namespace Logging {
             metadata: this.gatherMetadata()
           };
         this.entries.push(entry);
+        this.executeHandlers(entry);
       }
 
       public debug() {
@@ -100,6 +102,7 @@ namespace Logging {
             metadata: this.gatherMetadata()
           };
         this.entries.push(entry);
+        this.executeHandlers(entry);
       }
 
       public error() {
@@ -109,6 +112,7 @@ namespace Logging {
             metadata: this.gatherMetadata()
           };
         this.entries.push(entry);
+        this.executeHandlers(entry);
       }
 
       public info() {
@@ -118,6 +122,7 @@ namespace Logging {
             metadata: this.gatherMetadata()
           };
         this.entries.push(entry);
+        this.executeHandlers(entry);
       }
 
       public log() {
@@ -127,6 +132,7 @@ namespace Logging {
             metadata: this.gatherMetadata()
           };
         this.entries.push(entry);
+        this.executeHandlers(entry);
       }
 
       public warn() {
@@ -136,6 +142,7 @@ namespace Logging {
             metadata: this.gatherMetadata()
           };
         this.entries.push(entry);
+        this.executeHandlers(entry);
       }
 
       public group() {
@@ -145,6 +152,7 @@ namespace Logging {
             metadata: this.gatherMetadata()
           };
         this.entries.push(entry);
+        this.executeHandlers(entry);
 
         if (arguments.length > 0) {
           var groupLabel = arguments[0];
@@ -159,6 +167,7 @@ namespace Logging {
             metadata: this.gatherMetadata()
           };
         this.entries.push(entry);
+        this.executeHandlers(entry);
         this.groups.pop();
       }
     }
