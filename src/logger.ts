@@ -64,7 +64,7 @@ namespace Logging {
       }
     }
 
-    export class Logger extends BaseLogger {
+    export class MessageLogger extends BaseLogger {
       private readonly entries: Array<BaseLogEntry>;
       private readonly groups: Array<string>;
 

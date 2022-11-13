@@ -67,7 +67,7 @@ declare namespace Logging {
             protected gatherMetadata(): LogEntryMetadata;
             protected executeHandlers(entry: BaseLogEntry): boolean;
         }
-        class Logger extends BaseLogger {
+        class MessageLogger extends BaseLogger {
             private readonly entries;
             private readonly groups;
             constructor(options?: any);

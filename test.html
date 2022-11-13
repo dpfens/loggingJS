@@ -9,11 +9,19 @@
   </body>
   <script src="dist/logging.js" type="text/javascript"></script>
   <script type="text/javascript">
-  var serverHandler = new Logging.handler.RESTHandler('test/logging'),
+  var serverHandler = new Logging.handler.RESTHandler('test/logging/errors'),
     eventLogHandlers = [serverHandler],
     errorLogger = new Logging.logger.EventLogger({handlers: eventLogHandlers});
     window.addEventListener('error', errorLogger.handle);
 
     notThere(); // trigger the error event to test the logger/handlers
+  </script>
+
+  <script type="text/javascript">
+  var serverHandler = new Logging.handler.RESTHandler('test/logging/messages'),
+    logHandlers = [serverHandler],
+    logger = new Logging.logger.MessageLogger({handlers: logHandlers});
+
+    logger.info('This is a test');
   </script>
 </html>

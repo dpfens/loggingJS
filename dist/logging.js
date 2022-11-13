@@ -125,7 +125,6 @@ var Logging;
                 return true;
             };
             RESTHandler.prototype.handleFetch = function (entry) {
-                console.log(entry);
                 return fetch(this.endpoint, {
                     method: this.method,
                     headers: {
@@ -224,18 +223,18 @@ var Logging;
             return BaseLogger;
         }());
         logger.BaseLogger = BaseLogger;
-        var Logger = (function (_super) {
-            __extends(Logger, _super);
-            function Logger(options) {
+        var MessageLogger = (function (_super) {
+            __extends(MessageLogger, _super);
+            function MessageLogger(options) {
                 var _this = _super.call(this, options) || this;
                 _this.entries = [];
                 _this.groups = [];
                 return _this;
             }
-            Logger.prototype.truncateLog = function () {
+            MessageLogger.prototype.truncateLog = function () {
                 this.entries.splice(0, this.entries.length);
             };
-            Logger.prototype.assert = function () {
+            MessageLogger.prototype.assert = function () {
                 var entry = {
                     type: 'ASSERT',
                     arguments: this.toArray(arguments),
@@ -244,7 +243,7 @@ var Logging;
                 this.entries.push(entry);
                 this.executeHandlers(entry);
             };
-            Logger.prototype.clear = function () {
+            MessageLogger.prototype.clear = function () {
                 var entry = {
                     type: 'CLEAR',
                     arguments: this.toArray(arguments),
@@ -253,7 +252,7 @@ var Logging;
                 this.entries.push(entry);
                 this.executeHandlers(entry);
             };
-            Logger.prototype.debug = function () {
+            MessageLogger.prototype.debug = function () {
                 var entry = {
                     type: 'DEBUG',
                     arguments: this.toArray(arguments),
@@ -262,7 +261,7 @@ var Logging;
                 this.entries.push(entry);
                 this.executeHandlers(entry);
             };
-            Logger.prototype.error = function () {
+            MessageLogger.prototype.error = function () {
                 var entry = {
                     type: 'ERROR',
                     arguments: this.toArray(arguments),
@@ -271,7 +270,7 @@ var Logging;
                 this.entries.push(entry);
                 this.executeHandlers(entry);
             };
-            Logger.prototype.info = function () {
+            MessageLogger.prototype.info = function () {
                 var entry = {
                     type: 'INFO',
                     arguments: this.toArray(arguments),
@@ -280,7 +279,7 @@ var Logging;
                 this.entries.push(entry);
                 this.executeHandlers(entry);
             };
-            Logger.prototype.log = function () {
+            MessageLogger.prototype.log = function () {
                 var entry = {
                     type: 'LOG',
                     arguments: this.toArray(arguments),
@@ -289,7 +288,7 @@ var Logging;
                 this.entries.push(entry);
                 this.executeHandlers(entry);
             };
-            Logger.prototype.warn = function () {
+            MessageLogger.prototype.warn = function () {
                 var entry = {
                     type: 'WARN',
                     arguments: this.toArray(arguments),
@@ -298,7 +297,7 @@ var Logging;
                 this.entries.push(entry);
                 this.executeHandlers(entry);
             };
-            Logger.prototype.group = function () {
+            MessageLogger.prototype.group = function () {
                 var entry = {
                     type: 'GROUP',
                     arguments: this.toArray(arguments),
@@ -311,7 +310,7 @@ var Logging;
                     this.groups.push(groupLabel);
                 }
             };
-            Logger.prototype.groupEnd = function () {
+            MessageLogger.prototype.groupEnd = function () {
                 var entry = {
                     type: 'GROUPEND',
                     arguments: this.toArray(arguments),
@@ -321,9 +320,9 @@ var Logging;
                 this.executeHandlers(entry);
                 this.groups.pop();
             };
-            return Logger;
+            return MessageLogger;
         }(BaseLogger));
-        logger.Logger = Logger;
+        logger.MessageLogger = MessageLogger;
         var EventLogger = (function (_super) {
             __extends(EventLogger, _super);
             function EventLogger(options) {
