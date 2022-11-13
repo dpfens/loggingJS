@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+        "lib": ["es5", "es2015.promise", "dom", "es2015"],
+        "target": "es5",
+        "typeRoots": [
+          "node_modules/@types"
+        ],
+        "types": [
+          "./node_modules/user-agent-data-types"
+        ],
+        "sourceRoot": "./src/",
+        "rootDir": "./src/",
+        "outFile": "dist/main.js",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "declaration": true,
+        "declarationMap": true,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "removeComments": true,
+        "strict": true
+    },
+    "files":[
+      "src/main.ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
