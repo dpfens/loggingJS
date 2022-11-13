@@ -8,14 +8,16 @@ namespace Logging {
     export class BaseLogger {
       protected readonly collectors: Record<string, DataCollector>;
       protected readonly handlers: Array<EntryHandler>;
+      LOGENTRYTYPE: string = 'Log';
+      static DEFAULTCOLLECTORS: Record<string, DataCollector> = {
+        'navigation': new Logging.collector.NavigationCollector(),
+        'screen': new Logging.collector.ScreenCollector(),
+        'performance': new Logging.collector.PerformanceCollector()
+      };
 
       constructor(options?: any) {
         options = options || {};
-        this.collectors = options.collectors || {
-          'navigation': new Logging.collector.NavigationCollector(),
-          'screen': new Logging.collector.ScreenCollector(),
-          'performance': new Logging.collector.PerformanceCollector()
-        };
+        this.collectors = options.collectors || BaseLogger.DEFAULTCOLLECTORS;
         this.handlers = options.handlers || [];
       }
 
@@ -40,7 +42,8 @@ namespace Logging {
           return {
             timestamp: new Date,
             data: this.collect(),
-            type: 'Browser'
+            type: this.LOGENTRYTYPE,
+            environment: window ? 'Browser' : 'NodeJS'
           };
       }
 
@@ -173,6 +176,7 @@ namespace Logging {
     }
 
     export class EventLogger extends BaseLogger implements EventLogger {
+      LOGENTRYTYPE: string = 'Event';
 
       constructor(options?: any) {
         super(options);

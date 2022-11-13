@@ -5,6 +5,7 @@ interface DataCollector {
 interface LogEntryMetadata {
   timestamp: Date,
   type: string,
+  environment: string,
   data: any
 }
 
