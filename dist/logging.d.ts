@@ -46,6 +46,7 @@ declare namespace Logging {
         export class RESTHandler implements EntryHandler {
             protected readonly endpoint: string;
             protected readonly method: string;
+            protected readonly headers: any;
             constructor(endpoint: string, options?: any);
             static isSupported(): boolean;
             handleFetch(entry: BaseLogEntry): Promise<any>;

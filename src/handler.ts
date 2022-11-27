@@ -9,11 +9,13 @@ namespace Logging {
     export class RESTHandler implements EntryHandler {
       protected readonly endpoint: string;
       protected readonly method: string;
+      protected readonly headers: any;
 
       constructor(endpoint: string, options?: any) {
         this.endpoint = endpoint;
         options = options || {};
         this.method = options.method || 'POST';
+        this.headers = options.headers || {};
       }
 
       static isSupported(): boolean {
@@ -21,11 +23,11 @@ namespace Logging {
       }
 
       handleFetch(entry: BaseLogEntry): Promise<any> {
+        const headers = this.headers;
+        headers['Content-Type'] = 'application/json';
         return fetch(this.endpoint, {
           method: this.method,
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: headers,
           body: JSON.stringify(entry)
         });
       }
@@ -34,6 +36,9 @@ namespace Logging {
         const req = new XMLHttpRequest();
         req.open(this.method, this.endpoint);
         req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        for(var key in this.headers) {
+          req.setRequestHeader(key, this.headers[key]);
+        }
         req.send(JSON.stringify(entry));
       }
 
@@ -67,6 +72,10 @@ namespace Logging {
         this.element = element;
       }
 
+      isSupported(): boolean {
+        return typeof window !== 'undefined';
+      }
+
       render(entry: BaseLogEntry): string {
         var output = '';
         return output;
@@ -75,6 +84,21 @@ namespace Logging {
       handle(entry: BaseLogEntry): boolean {
         this.element.innerHTML += this.render(entry);
         return true;
+      }
+    }
+
+    class ConsoleHandler implements EntryHandler {
+
+      isSupported(): boolean {
+        return typeof console !== 'undefined';
+      }
+
+      handle(entry: BaseLogEntry): boolean {
+        if (console && console.table) {
+          console.table(entry);
+          return true;
+        }
+        return false;
       }
     }
 

@@ -140,16 +140,17 @@ var Logging;
                 this.endpoint = endpoint;
                 options = options || {};
                 this.method = options.method || 'POST';
+                this.headers = options.headers || {};
             }
             RESTHandler.isSupported = function () {
                 return true;
             };
             RESTHandler.prototype.handleFetch = function (entry) {
+                var headers = this.headers;
+                headers['Content-Type'] = 'application/json';
                 return fetch(this.endpoint, {
                     method: this.method,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: headers,
                     body: JSON.stringify(entry)
                 });
             };
@@ -157,6 +158,9 @@ var Logging;
                 var req = new XMLHttpRequest();
                 req.open(this.method, this.endpoint);
                 req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                for (var key in this.headers) {
+                    req.setRequestHeader(key, this.headers[key]);
+                }
                 req.send(JSON.stringify(entry));
             };
             RESTHandler.prototype.handle = function (entry) {
@@ -187,6 +191,9 @@ var Logging;
                 };
                 this.element = element;
             }
+            HTMLHandler.prototype.isSupported = function () {
+                return typeof window !== 'undefined';
+            };
             HTMLHandler.prototype.render = function (entry) {
                 var output = '';
                 return output;
@@ -200,6 +207,9 @@ var Logging;
         var ConsoleHandler = (function () {
             function ConsoleHandler() {
             }
+            ConsoleHandler.prototype.isSupported = function () {
+                return typeof console !== 'undefined';
+            };
             ConsoleHandler.prototype.handle = function (entry) {
                 if (console && console.table) {
                     console.table(entry);
