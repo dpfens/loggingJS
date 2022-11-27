@@ -197,6 +197,18 @@ var Logging;
             };
             return HTMLHandler;
         }());
+        var ConsoleHandler = (function () {
+            function ConsoleHandler() {
+            }
+            ConsoleHandler.prototype.handle = function (entry) {
+                if (console && console.table) {
+                    console.table(entry);
+                    return true;
+                }
+                return false;
+            };
+            return ConsoleHandler;
+        }());
     })(handler = Logging.handler || (Logging.handler = {}));
 })(Logging || (Logging = {}));
 var Logging;
@@ -267,6 +279,10 @@ var Logging;
                 this.entries.splice(0, this.entries.length);
             };
             MessageLogger.prototype.assert = function () {
+                var assertion = arguments[0];
+                if (!assertion) {
+                    return false;
+                }
                 var entry = {
                     type: 'ASSERT',
                     arguments: this.toArray(arguments),

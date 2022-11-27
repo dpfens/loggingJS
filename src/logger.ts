@@ -79,6 +79,10 @@ namespace Logging {
       }
 
       public assert() {
+        var assertion = arguments[0];
+        if (!assertion) {
+          return false;
+        }
         const entry: LogEntry = {
             type: 'ASSERT',
             arguments: this.toArray(arguments),

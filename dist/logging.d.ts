@@ -73,7 +73,7 @@ declare namespace Logging {
             private readonly groups;
             constructor(options?: any);
             truncateLog(): void;
-            assert(): void;
+            assert(): false | undefined;
             clear(): void;
             debug(): void;
             error(): void;
