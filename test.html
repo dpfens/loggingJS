@@ -9,7 +9,7 @@
   </body>
   <script src="dist/logging.js" type="text/javascript"></script>
   <script type="text/javascript">
-  var serverHandler = new Logging.handler.RESTHandler('test/logging/errors'),
+  var serverHandler = new Logging.handler.RESTHandler('/test/logging/errors'),
     eventLogHandlers = [serverHandler],
     errorLogger = new Logging.logger.EventLogger({handlers: eventLogHandlers});
     window.addEventListener('error', errorLogger.handle);

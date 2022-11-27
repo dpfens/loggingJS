@@ -48,5 +48,35 @@ namespace Logging {
       }
     }
 
+    class HTMLHandler implements EntryHandler {
+      protected element: HTMLElement;
+      protected MESSAGELEVELS: Record<string, string> = {
+        'ASSERT': '#5A5A5A',
+        'DEBUG': '#00FF00',
+        'INFO': '#0000FF',
+        'WARN': '#FFD700',
+        'ERROR': '#FF0000',
+        'DEFAULT': '#5A5A5A'
+      };
+      protected EVENTLEVELS: Record<string, string> = {
+        'error': '#FF0000',
+        'DEFAULT': '#5A5A5A'
+      };
+
+      constructor(element: HTMLElement) {
+        this.element = element;
+      }
+
+      render(entry: BaseLogEntry): string {
+        var output = '';
+        return output;
+      }
+
+      handle(entry: BaseLogEntry): boolean {
+        this.element.innerHTML += this.render(entry);
+        return true;
+      }
+    }
+
   }
 }

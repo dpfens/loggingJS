@@ -33,6 +33,7 @@ declare namespace Logging {
             collectScreen(): any;
         }
         class PerformanceCollector implements DataCollector {
+            collectMemory(): any;
             collect(): any;
         }
     }

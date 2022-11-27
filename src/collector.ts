@@ -84,11 +84,33 @@ namespace Logging {
 
     export class PerformanceCollector implements DataCollector {
 
-      collect(): any {
-        const output = JSON.parse(JSON.stringify(window.performance));
-        output.entries = JSON.parse(JSON.stringify(window.performance.getEntries()));
-        return output;
+      collectMemory() {
+        if ((window.performance as any).memory) {
+          const output:any = {};
+          for (var key in (window.performance as any).memory) {
+            const value = (window.performance as any).memory[key];
+            if (!window.isNaN(value)) {
+              output[key] = value;
+            }
+          }
+          return output;
+        }
       }
+
+      collect(): any {
+        if (window.performance) {
+          const output = window.performance.toJSON();
+          if (window.performance && !!window.performance.getEntries) {
+            output.entries = window.performance.getEntries();
+          }
+          const memory = this.collectMemory();
+          if (memory) {
+            output.memory = memory;
+          }
+          return output;
+        }
+      }
+      
     }
 
   }

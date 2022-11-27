@@ -101,10 +101,30 @@ var Logging;
         var PerformanceCollector = (function () {
             function PerformanceCollector() {
             }
+            PerformanceCollector.prototype.collectMemory = function () {
+                if (window.performance.memory) {
+                    var output = {};
+                    for (var key in window.performance.memory) {
+                        var value = window.performance.memory[key];
+                        if (!window.isNaN(value)) {
+                            output[key] = value;
+                        }
+                    }
+                    return output;
+                }
+            };
             PerformanceCollector.prototype.collect = function () {
-                var output = JSON.parse(JSON.stringify(window.performance));
-                output.entries = JSON.parse(JSON.stringify(window.performance.getEntries()));
-                return output;
+                if (window.performance) {
+                    var output = window.performance.toJSON();
+                    if (window.performance && !!window.performance.getEntries) {
+                        output.entries = window.performance.getEntries();
+                    }
+                    var memory = this.collectMemory();
+                    if (memory) {
+                        output.memory = memory;
+                    }
+                    return output;
+                }
             };
             return PerformanceCollector;
         }());
@@ -153,6 +173,18 @@ var Logging;
         handler.RESTHandler = RESTHandler;
         var HTMLHandler = (function () {
             function HTMLHandler(element) {
+                this.MESSAGELEVELS = {
+                    'ASSERT': '#5A5A5A',
+                    'DEBUG': '#00FF00',
+                    'INFO': '#0000FF',
+                    'WARN': '#FFD700',
+                    'ERROR': '#FF0000',
+                    'DEFAULT': '#5A5A5A'
+                };
+                this.EVENTLEVELS = {
+                    'error': '#FF0000',
+                    'DEFAULT': '#5A5A5A'
+                };
                 this.element = element;
             }
             HTMLHandler.prototype.render = function (entry) {
