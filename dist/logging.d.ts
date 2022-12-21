@@ -56,11 +56,29 @@ declare namespace Logging {
         export {};
     }
 }
+interface Task {
+    handler: EntryHandler;
+    entry: BaseLogEntry;
+}
+declare namespace Logging {
+    namespace Scheduler {
+        class BackgroundScheduler {
+            protected queue: Array<Task>;
+            protected isHandling: number;
+            protected timeout?: number;
+            constructor(timeout?: number);
+            push(handler: EntryHandler, entry: BaseLogEntry): void;
+            startIdleProcessing(): void;
+            handle(deadline: IdleDeadline): void;
+        }
+    }
+}
 declare namespace Logging {
     namespace logger {
         class BaseLogger {
             protected readonly collectors: Record<string, DataCollector>;
             protected readonly handlers: Array<EntryHandler>;
+            protected readonly scheduler: Logging.Scheduler.BackgroundScheduler;
             LOGENTRYTYPE: string;
             static DEFAULTCOLLECTORS: Record<string, DataCollector>;
             constructor(options?: any);

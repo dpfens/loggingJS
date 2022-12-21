@@ -1,6 +1,7 @@
 /// <reference path="interfaces.ts" />
 /// <reference path="collector.ts" />
 /// <reference path="handler.ts" />
+/// <reference path="scheduler.ts" />
 
 namespace Logging {
   export namespace logger {
@@ -8,6 +9,7 @@ namespace Logging {
     export class BaseLogger {
       protected readonly collectors: Record<string, DataCollector>;
       protected readonly handlers: Array<EntryHandler>;
+      protected readonly scheduler: Logging.scheduler.BaseScheduler;
       LOGENTRYTYPE: string = 'Log';
       static DEFAULTCOLLECTORS: Record<string, DataCollector> = {
         'navigation': new Logging.collector.NavigationCollector(),
@@ -19,6 +21,7 @@ namespace Logging {
         options = options || {};
         this.collectors = options.collectors || BaseLogger.DEFAULTCOLLECTORS;
         this.handlers = options.handlers || [];
+        this.scheduler = options.scheduler || Logging.scheduler.IdleBackgroundScheduler.isSupported() ? new Logging.scheduler.IdleBackgroundScheduler() : new Logging.scheduler.BlockingScheduler();
       }
 
       protected toArray(iterable: any): Array<any> {
@@ -48,19 +51,11 @@ namespace Logging {
       }
 
       protected executeHandlers(entry: BaseLogEntry) {
-        var success = true;
         for (var key in this.handlers) {
-
           var handler: EntryHandler = this.handlers[key];
-          try {
-            handler.handle(entry);
-          } catch (e) {
-            console.error(e);
-            success = false;
-          }
-
+          this.scheduler.push(handler, entry);
         }
-        return success;
+        return true;
       }
     }
 
@@ -207,9 +202,8 @@ namespace Logging {
             metadata: this.gatherMetadata(),
             event: eventData
           };
-
-        var success = this.executeHandlers(entry);
-        return success;
+        this.executeHandlers(entry);
+        return true;
       }
     }
 

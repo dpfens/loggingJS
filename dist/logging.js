@@ -223,6 +223,65 @@ var Logging;
 })(Logging || (Logging = {}));
 var Logging;
 (function (Logging) {
+    var Scheduler;
+    (function (Scheduler) {
+        var BackgroundScheduler = (function () {
+            function BackgroundScheduler(timeout) {
+                this.queue = [];
+                this.isHandling = 0;
+                this.timeout = timeout;
+                this.handle = this.handle.bind(this);
+            }
+            BackgroundScheduler.prototype.push = function (handler, entry) {
+                console.log(handler);
+                if ('requestIdleCallback' in window) {
+                    var task = {
+                        handler: handler,
+                        entry: entry
+                    };
+                    this.queue.push(task);
+                    if (!this.isHandling) {
+                        this.startIdleProcessing();
+                    }
+                }
+                else {
+                    if (this.timeout) {
+                        setTimeout(function () {
+                            handler.handle(entry);
+                        }, this.timeout);
+                    }
+                    else {
+                        handler.handle(entry);
+                    }
+                }
+            };
+            BackgroundScheduler.prototype.startIdleProcessing = function () {
+                if (this.timeout) {
+                    this.isHandling = requestIdleCallback(this.handle, { timeout: this.timeout });
+                }
+                else {
+                    this.isHandling = requestIdleCallback(this.handle);
+                }
+            };
+            BackgroundScheduler.prototype.handle = function (deadline) {
+                while ((deadline.timeRemaining() > 0 || deadline.didTimeout) && this.queue.length > 0) {
+                    var task = this.queue.shift();
+                    task.handler.handle(task.entry);
+                }
+                if (this.queue.length) {
+                    this.startIdleProcessing();
+                }
+                else {
+                    this.isHandling = 0;
+                }
+            };
+            return BackgroundScheduler;
+        }());
+        Scheduler.BackgroundScheduler = BackgroundScheduler;
+    })(Scheduler = Logging.Scheduler || (Logging.Scheduler = {}));
+})(Logging || (Logging = {}));
+var Logging;
+(function (Logging) {
     var logger;
     (function (logger) {
         var BaseLogger = (function () {
@@ -231,6 +290,7 @@ var Logging;
                 options = options || {};
                 this.collectors = options.collectors || BaseLogger.DEFAULTCOLLECTORS;
                 this.handlers = options.handlers || [];
+                this.scheduler = options.scheduler || new Logging.Scheduler.BackgroundScheduler();
             }
             BaseLogger.prototype.toArray = function (iterable) {
                 var output = [];
@@ -256,18 +316,11 @@ var Logging;
                 };
             };
             BaseLogger.prototype.executeHandlers = function (entry) {
-                var success = true;
                 for (var key in this.handlers) {
                     var handler = this.handlers[key];
-                    try {
-                        handler.handle(entry);
-                    }
-                    catch (e) {
-                        console.error(e);
-                        success = false;
-                    }
+                    this.scheduler.push(handler, entry);
                 }
-                return success;
+                return true;
             };
             BaseLogger.DEFAULTCOLLECTORS = {
                 'navigation': new Logging.collector.NavigationCollector(),
@@ -412,8 +465,8 @@ var Logging;
                     metadata: this.gatherMetadata(),
                     event: eventData
                 };
-                var success = this.executeHandlers(entry);
-                return success;
+                this.executeHandlers(entry);
+                return true;
             };
             return EventLogger;
         }(BaseLogger));

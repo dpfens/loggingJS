@@ -39,6 +39,9 @@ Collectors gather information about the environment at the time an event/message
 ### Handlers
 Handlers are configurable objects that process the message/event and the associated data according to the needs of the developer. Most of the time, I anticipate most of the handlers being `RESTHandler` instances for sending `POST` data to a given API endpoint.  Handlers must implement a `handle` method which "handles" the collected data about the error/message.  New handlers can be added created by developers to handle data in ways that are not already implemented by LoggingJS.
 
+## Schedulers
+Schedulers are configurable objects for handling `Logging.handler.EntryHandler` execution.  These mainly used as a facade to more complicated patterns of executing code without blocking the main JS thread.  Schedulers must implement a `push` method for pushing handlers and entries into the scheduler to be executed at a time allotted by the scheduler, and an `isSupported` static method to determine if the scheduler is supported by the end-user's browser at run-time.
+
 ## Common Tasks
 
 ### Specifying collectors
@@ -46,7 +49,7 @@ An example to how customize which collectors are used:
 ```javascript
 var collectors = {
   application: new ApplicationStateCollector()
-},
+}
 errorLogger = new Logging.logger.EventLogger({collectors: collectors});
 ```
 
@@ -55,6 +58,12 @@ Here is an example for how to automatically retain the default collectors, and t
 var collectors = Object.assign({}, Logging.logger.BaseLogger.DEFAULTCOLLECTORS);
   collectors['application'] = new ApplicationStateCollector();
 var errorLogger = new Logging.logger.EventLogger({collectors: collectors});
+```
+
+### Specifying a scheduler
+```javascript
+var scheduler = new Logging.scheduler.IdleBackgroundScheduler(50) // 50 millisecond timeout of requestIdleCallback
+var errorLogger = new Logging.logger.EventLogger({scheduler: scheduler});
 ```
 
 ### Integrating into React
@@ -81,6 +90,6 @@ class MyComponent extends React.Component {
       collectors = {'component': componentCollector};
     this.logger = new Logging.logger.MessageLogger({handlers: logHandlers, collectors: collectors });
   }
-  
+
 }
 ```
