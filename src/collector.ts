@@ -13,6 +13,7 @@ namespace Logging {
             deviceConcurrency: (navigator as any).deviceConcurrency,
             doNotTrack: navigator.doNotTrack,
             language: navigator.language,
+            languages: navigator.languages,
             maxTouchPoints: navigator.maxTouchPoints,
             onLine: navigator.onLine,
             pdfViewerEnabled: (navigator as any).pdfViewerEnabled,
@@ -24,7 +25,8 @@ namespace Logging {
             userAgent: {
               value: navigator.userAgent,
               data: JSON.parse(JSON.stringify(navigator.userAgentData))
-            }
+            },
+            webdriver: navigator.webdriver
           };
 
         var userActivation = null;
@@ -35,6 +37,19 @@ namespace Logging {
           };
         }
         data.userActivation = userActivation;
+
+        var connection = null;
+        if ((navigator as any).connection) {
+          var networkInformation = (navigator as any).connection;
+          connection = {
+            downlink: (networkInformation as any).downlink,
+            downlinkMax: (networkInformation as any).downlinkMax,
+            effectiveType: (networkInformation as any).effectiveType,
+            rtt: (networkInformation as any).rtt,
+            saveData: (networkInformation as any).saveData
+          };
+        }
+        data.connection = connection;
         return data;
       }
 

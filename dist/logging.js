@@ -31,6 +31,7 @@ var Logging;
                     deviceConcurrency: navigator.deviceConcurrency,
                     doNotTrack: navigator.doNotTrack,
                     language: navigator.language,
+                    languages: navigator.languages,
                     maxTouchPoints: navigator.maxTouchPoints,
                     onLine: navigator.onLine,
                     pdfViewerEnabled: navigator.pdfViewerEnabled,
@@ -42,7 +43,8 @@ var Logging;
                     userAgent: {
                         value: navigator.userAgent,
                         data: JSON.parse(JSON.stringify(navigator.userAgentData))
-                    }
+                    },
+                    webdriver: navigator.webdriver
                 };
                 var userActivation = null;
                 if (navigator.userActivation) {
@@ -52,6 +54,18 @@ var Logging;
                     };
                 }
                 data.userActivation = userActivation;
+                var connection = null;
+                if (navigator.connection) {
+                    var networkInformation = navigator.connection;
+                    connection = {
+                        downlink: networkInformation.downlink,
+                        downlinkMax: networkInformation.downlinkMax,
+                        effectiveType: networkInformation.effectiveType,
+                        rtt: networkInformation.rtt,
+                        saveData: networkInformation.saveData
+                    };
+                }
+                data.connection = connection;
                 return data;
             };
             return NavigationCollector;
