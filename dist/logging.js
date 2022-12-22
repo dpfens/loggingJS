@@ -19,131 +19,134 @@ var Logging;
 (function (Logging) {
     var collector;
     (function (collector) {
-        var NavigationCollector = (function () {
-            function NavigationCollector() {
-            }
-            NavigationCollector.prototype.collect = function () {
-                var data = {
-                    appCodeName: navigator.appCodeName,
-                    appName: navigator.appName,
-                    appVersion: navigator.appVersion,
-                    cookieEnabled: navigator.cookieEnabled,
-                    deviceConcurrency: navigator.deviceConcurrency,
-                    doNotTrack: navigator.doNotTrack,
-                    language: navigator.language,
-                    languages: navigator.languages,
-                    maxTouchPoints: navigator.maxTouchPoints,
-                    onLine: navigator.onLine,
-                    pdfViewerEnabled: navigator.pdfViewerEnabled,
-                    platform: navigator.platform,
-                    product: navigator.product,
-                    productSub: navigator.productSub,
-                    vendor: navigator.vendor,
-                    vendorSub: navigator.vendorSub,
-                    userAgent: {
-                        value: navigator.userAgent,
-                        data: JSON.parse(JSON.stringify(navigator.userAgentData))
-                    },
-                    webdriver: navigator.webdriver
-                };
-                var userActivation = null;
-                if (navigator.userActivation) {
-                    userActivation = {
-                        isActive: navigator.userActivation.isActive,
-                        hasBeenActive: navigator.userActivation.hasBeenActive
-                    };
+        var browser;
+        (function (browser) {
+            var NavigationCollector = (function () {
+                function NavigationCollector() {
                 }
-                data.userActivation = userActivation;
-                var connection = null;
-                if (navigator.connection) {
-                    var networkInformation = navigator.connection;
-                    connection = {
-                        downlink: networkInformation.downlink,
-                        downlinkMax: networkInformation.downlinkMax,
-                        effectiveType: networkInformation.effectiveType,
-                        rtt: networkInformation.rtt,
-                        saveData: networkInformation.saveData
+                NavigationCollector.prototype.collect = function () {
+                    var data = {
+                        appCodeName: navigator.appCodeName,
+                        appName: navigator.appName,
+                        appVersion: navigator.appVersion,
+                        cookieEnabled: navigator.cookieEnabled,
+                        deviceConcurrency: navigator.deviceConcurrency,
+                        doNotTrack: navigator.doNotTrack,
+                        language: navigator.language,
+                        languages: navigator.languages,
+                        maxTouchPoints: navigator.maxTouchPoints,
+                        onLine: navigator.onLine,
+                        pdfViewerEnabled: navigator.pdfViewerEnabled,
+                        platform: navigator.platform,
+                        product: navigator.product,
+                        productSub: navigator.productSub,
+                        vendor: navigator.vendor,
+                        vendorSub: navigator.vendorSub,
+                        userAgent: {
+                            value: navigator.userAgent,
+                            data: JSON.parse(JSON.stringify(navigator.userAgentData))
+                        },
+                        webdriver: navigator.webdriver
                     };
+                    var userActivation = null;
+                    if (navigator.userActivation) {
+                        userActivation = {
+                            isActive: navigator.userActivation.isActive,
+                            hasBeenActive: navigator.userActivation.hasBeenActive
+                        };
+                    }
+                    data.userActivation = userActivation;
+                    var connection = null;
+                    if (navigator.connection) {
+                        var networkInformation = navigator.connection;
+                        connection = {
+                            downlink: networkInformation.downlink,
+                            downlinkMax: networkInformation.downlinkMax,
+                            effectiveType: networkInformation.effectiveType,
+                            rtt: networkInformation.rtt,
+                            saveData: networkInformation.saveData
+                        };
+                    }
+                    data.connection = connection;
+                    return data;
+                };
+                return NavigationCollector;
+            }());
+            browser.NavigationCollector = NavigationCollector;
+            var ScreenCollector = (function () {
+                function ScreenCollector() {
                 }
-                data.connection = connection;
-                return data;
-            };
-            return NavigationCollector;
-        }());
-        collector.NavigationCollector = NavigationCollector;
-        var ScreenCollector = (function () {
-            function ScreenCollector() {
-            }
-            ScreenCollector.prototype.collect = function () {
-                return {
-                    visibilityState: document.visibilityState,
-                    devicePixelRatio: window.devicePixelRatio,
-                    innerHeight: window.innerHeight,
-                    innerWidth: window.innerWidth,
-                    outerHeight: window.outerHeight,
-                    outerWidth: window.outerWidth,
-                    pageXOffset: window.pageXOffset,
-                    pageYOffset: window.pageYOffset,
-                    screen: this.collectScreen(),
-                    screenLeft: window.screenLeft,
-                    screenTop: window.screenTop,
-                    screenX: window.screenX,
-                    screenY: window.screenY,
-                    scrollX: window.scrollX,
-                    scrollY: window.scrollY
+                ScreenCollector.prototype.collect = function () {
+                    return {
+                        visibilityState: document.visibilityState,
+                        devicePixelRatio: window.devicePixelRatio,
+                        innerHeight: window.innerHeight,
+                        innerWidth: window.innerWidth,
+                        outerHeight: window.outerHeight,
+                        outerWidth: window.outerWidth,
+                        pageXOffset: window.pageXOffset,
+                        pageYOffset: window.pageYOffset,
+                        screen: this.collectScreen(),
+                        screenLeft: window.screenLeft,
+                        screenTop: window.screenTop,
+                        screenX: window.screenX,
+                        screenY: window.screenY,
+                        scrollX: window.scrollX,
+                        scrollY: window.scrollY
+                    };
                 };
-            };
-            ScreenCollector.prototype.collectScreen = function () {
-                return {
-                    availHeight: window.screen.availHeight,
-                    availLeft: window.screen.availLeft,
-                    availTop: window.screen.availTop,
-                    availWidth: window.screen.availWidth,
-                    colorDepth: window.screen.colorDepth,
-                    height: window.screen.height,
-                    isExtended: window.screen.isExtended,
-                    orientation: {
-                        angle: window.screen.orientation.angle,
-                        type: window.screen.orientation.type
-                    },
-                    pixelDepth: window.screen.pixelDepth,
-                    width: window.screen.width
+                ScreenCollector.prototype.collectScreen = function () {
+                    return {
+                        availHeight: window.screen.availHeight,
+                        availLeft: window.screen.availLeft,
+                        availTop: window.screen.availTop,
+                        availWidth: window.screen.availWidth,
+                        colorDepth: window.screen.colorDepth,
+                        height: window.screen.height,
+                        isExtended: window.screen.isExtended,
+                        orientation: {
+                            angle: window.screen.orientation.angle,
+                            type: window.screen.orientation.type
+                        },
+                        pixelDepth: window.screen.pixelDepth,
+                        width: window.screen.width
+                    };
                 };
-            };
-            return ScreenCollector;
-        }());
-        collector.ScreenCollector = ScreenCollector;
-        var PerformanceCollector = (function () {
-            function PerformanceCollector() {
-            }
-            PerformanceCollector.prototype.collectMemory = function () {
-                if (window.performance.memory) {
-                    var output = {};
-                    for (var key in window.performance.memory) {
-                        var value = window.performance.memory[key];
-                        if (!window.isNaN(value)) {
-                            output[key] = value;
+                return ScreenCollector;
+            }());
+            browser.ScreenCollector = ScreenCollector;
+            var PerformanceCollector = (function () {
+                function PerformanceCollector() {
+                }
+                PerformanceCollector.prototype.collectMemory = function () {
+                    if (window.performance.memory) {
+                        var output = {};
+                        for (var key in window.performance.memory) {
+                            var value = window.performance.memory[key];
+                            if (!window.isNaN(value)) {
+                                output[key] = value;
+                            }
                         }
+                        return output;
                     }
-                    return output;
-                }
-            };
-            PerformanceCollector.prototype.collect = function () {
-                if (window.performance) {
-                    var output = window.performance.toJSON();
-                    if (window.performance && !!window.performance.getEntries) {
-                        output.entries = window.performance.getEntries();
+                };
+                PerformanceCollector.prototype.collect = function () {
+                    if (window.performance) {
+                        var output = window.performance.toJSON();
+                        if (window.performance && !!window.performance.getEntries) {
+                            output.entries = window.performance.getEntries();
+                        }
+                        var memory = this.collectMemory();
+                        if (memory) {
+                            output.memory = memory;
+                        }
+                        return output;
                     }
-                    var memory = this.collectMemory();
-                    if (memory) {
-                        output.memory = memory;
-                    }
-                    return output;
-                }
-            };
-            return PerformanceCollector;
-        }());
-        collector.PerformanceCollector = PerformanceCollector;
+                };
+                return PerformanceCollector;
+            }());
+            browser.PerformanceCollector = PerformanceCollector;
+        })(browser = collector.browser || (collector.browser = {}));
     })(collector = Logging.collector || (Logging.collector = {}));
 })(Logging || (Logging = {}));
 var Logging;
@@ -328,7 +331,16 @@ var Logging;
             function BaseLogger(options) {
                 this.LOGENTRYTYPE = 'Log';
                 options = options || {};
-                this.collectors = options.collectors || BaseLogger.DEFAULTCOLLECTORS;
+                var collectors = options.collectors;
+                if (!collectors) {
+                    if (window) {
+                        collectors = BaseLogger.DEFAULTBROWSERCOLLECTORS;
+                    }
+                    else {
+                        collectors = {};
+                    }
+                }
+                this.collectors = collectors;
                 this.handlers = options.handlers || [];
                 this.scheduler = options.scheduler || Logging.scheduler.IdleBackgroundScheduler.isSupported() ? new Logging.scheduler.IdleBackgroundScheduler() : new Logging.scheduler.BlockingScheduler();
             }
@@ -367,10 +379,10 @@ var Logging;
                 }
                 return true;
             };
-            BaseLogger.DEFAULTCOLLECTORS = {
-                'navigation': new Logging.collector.NavigationCollector(),
-                'screen': new Logging.collector.ScreenCollector(),
-                'performance': new Logging.collector.PerformanceCollector()
+            BaseLogger.DEFAULTBROWSERCOLLECTORS = {
+                'navigation': new Logging.collector.browser.NavigationCollector(),
+                'screen': new Logging.collector.browser.ScreenCollector(),
+                'performance': new Logging.collector.browser.PerformanceCollector()
             };
             return BaseLogger;
         }());

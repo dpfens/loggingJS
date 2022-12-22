@@ -1,5 +1,5 @@
 /// <reference path="interfaces.ts" />
-/// <reference path="collector.ts" />
+/// <reference path="collectors/browser.ts" />
 /// <reference path="handler.ts" />
 /// <reference path="scheduler.ts" />
 
@@ -11,15 +11,23 @@ namespace Logging {
       protected readonly handlers: Array<EntryHandler>;
       protected readonly scheduler: Logging.scheduler.BaseScheduler;
       LOGENTRYTYPE: string = 'Log';
-      static DEFAULTCOLLECTORS: Record<string, DataCollector> = {
-        'navigation': new Logging.collector.NavigationCollector(),
-        'screen': new Logging.collector.ScreenCollector(),
-        'performance': new Logging.collector.PerformanceCollector()
+      static DEFAULTBROWSERCOLLECTORS: Record<string, DataCollector> = {
+        'navigation': new Logging.collector.browser.NavigationCollector(),
+        'screen': new Logging.collector.browser.ScreenCollector(),
+        'performance': new Logging.collector.browser.PerformanceCollector()
       };
 
       constructor(options?: any) {
         options = options || {};
-        this.collectors = options.collectors || BaseLogger.DEFAULTCOLLECTORS;
+        var collectors = options.collectors;
+        if (!collectors) {
+          if (window) {
+            collectors = BaseLogger.DEFAULTBROWSERCOLLECTORS;
+          } else {
+            collectors = {};
+          }
+        }
+        this.collectors = collectors;
         this.handlers = options.handlers || [];
         this.scheduler = options.scheduler || Logging.scheduler.IdleBackgroundScheduler.isSupported() ? new Logging.scheduler.IdleBackgroundScheduler() : new Logging.scheduler.BlockingScheduler();
       }

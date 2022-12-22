@@ -30,16 +30,18 @@ interface EventLogger {
 }
 declare namespace Logging {
     namespace collector {
-        class NavigationCollector implements DataCollector {
-            collect(): any;
-        }
-        class ScreenCollector implements DataCollector {
-            collect(): any;
-            collectScreen(): any;
-        }
-        class PerformanceCollector implements DataCollector {
-            collectMemory(): any;
-            collect(): any;
+        namespace browser {
+            class NavigationCollector implements DataCollector {
+                collect(): any;
+            }
+            class ScreenCollector implements DataCollector {
+                collect(): any;
+                collectScreen(): any;
+            }
+            class PerformanceCollector implements DataCollector {
+                collectMemory(): any;
+                collect(): any;
+            }
         }
     }
 }
@@ -96,7 +98,7 @@ declare namespace Logging {
             protected readonly handlers: Array<EntryHandler>;
             protected readonly scheduler: Logging.scheduler.BaseScheduler;
             LOGENTRYTYPE: string;
-            static DEFAULTCOLLECTORS: Record<string, DataCollector>;
+            static DEFAULTBROWSERCOLLECTORS: Record<string, DataCollector>;
             constructor(options?: any);
             protected toArray(iterable: any): Array<any>;
             protected collect(): any;

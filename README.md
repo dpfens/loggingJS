@@ -27,11 +27,11 @@ The library is broken up into 3 main components, `loggers`, `collectors`, and `h
 ### Loggers
 Loggers are the main component of the library that developers will interact with.  Loggers are configured to use `collectors` to collect data about a message, and `handlers` to do something with that data. `handlers` and `collectors` know nothing about the logger, or about the other handlers and collectors that are used by the logger.
 
-By default, Loggers are attached with the following `Logging.logger.BaseLogger.DEFAULTCOLLECTORS`:
+By default, Loggers are attached with the following `Logging.logger.BaseLogger.DEFAULTBROWSERCOLLECTORS`:
 
-* `Logging.collector.NavigationCollector` - Collects information from the `window.navigator` object.
-* `Logging.collector.ScreenCollector` - Collects information about the screen of the current user from `window` and `window.screen`.
-* `Logging.collector.PerformanceCollector` - Collects information about the `window.performance` and `Performance entries`.
+* `Logging.collector.browser.NavigationCollector` - Collects information from the `window.navigator` object.
+* `Logging.collector.browser.ScreenCollector` - Collects information about the screen of the current user from `window` and `window.screen`.
+* `Logging.collector.browser.PerformanceCollector` - Collects information about the `window.performance` and `Performance entries`.
 
 ### Collectors
 Collectors gather information about the environment at the time an event/message is logged.  These collectors read about the current state of the page/browser/etc.  Collectors must implement a `collect` method which returns the collected data to the `Logger`.  New collectors can be added created by developers to include application-specific data about the current state of their application at the time of an event/message.
@@ -55,7 +55,7 @@ errorLogger = new Logging.logger.EventLogger({collectors: collectors});
 
 Here is an example for how to automatically retain the default collectors, and to add your own:
 ```javascript
-var collectors = Object.assign({}, Logging.logger.BaseLogger.DEFAULTCOLLECTORS);
+var collectors = Object.assign({}, Logging.logger.BaseLogger.DEFAULTBROWSERCOLLECTORS);
   collectors['application'] = new ApplicationStateCollector();
 var errorLogger = new Logging.logger.EventLogger({collectors: collectors});
 ```
