@@ -62,6 +62,7 @@ var Logging;
             }
             ScreenCollector.prototype.collect = function () {
                 return {
+                    visibilityState: document.visibilityState,
                     devicePixelRatio: window.devicePixelRatio,
                     innerHeight: window.innerHeight,
                     innerWidth: window.innerWidth,
@@ -223,39 +224,38 @@ var Logging;
 })(Logging || (Logging = {}));
 var Logging;
 (function (Logging) {
-    var Scheduler;
-    (function (Scheduler) {
-        var BackgroundScheduler = (function () {
-            function BackgroundScheduler(timeout) {
-                this.queue = [];
-                this.isHandling = 0;
-                this.timeout = timeout;
-                this.handle = this.handle.bind(this);
+    var scheduler;
+    (function (scheduler) {
+        var BaseScheduler = (function () {
+            function BaseScheduler() {
             }
-            BackgroundScheduler.prototype.push = function (handler, entry) {
-                console.log(handler);
-                if ('requestIdleCallback' in window) {
-                    var task = {
-                        handler: handler,
-                        entry: entry
-                    };
-                    this.queue.push(task);
-                    if (!this.isHandling) {
-                        this.startIdleProcessing();
-                    }
-                }
-                else {
-                    if (this.timeout) {
-                        setTimeout(function () {
-                            handler.handle(entry);
-                        }, this.timeout);
-                    }
-                    else {
-                        handler.handle(entry);
-                    }
+            BaseScheduler.isSupported = function () {
+                return false;
+            };
+            return BaseScheduler;
+        }());
+        scheduler.BaseScheduler = BaseScheduler;
+        var IdleBackgroundScheduler = (function (_super) {
+            __extends(IdleBackgroundScheduler, _super);
+            function IdleBackgroundScheduler(timeout) {
+                var _this = _super.call(this) || this;
+                _this.queue = [];
+                _this.isHandling = 0;
+                _this.timeout = timeout;
+                _this.handle = _this.handle.bind(_this);
+                return _this;
+            }
+            IdleBackgroundScheduler.prototype.push = function (handler, entry) {
+                var task = {
+                    handler: handler,
+                    entry: entry
+                };
+                this.queue.push(task);
+                if (!this.isHandling) {
+                    this.startIdleProcessing();
                 }
             };
-            BackgroundScheduler.prototype.startIdleProcessing = function () {
+            IdleBackgroundScheduler.prototype.startIdleProcessing = function () {
                 if (this.timeout) {
                     this.isHandling = requestIdleCallback(this.handle, { timeout: this.timeout });
                 }
@@ -263,7 +263,7 @@ var Logging;
                     this.isHandling = requestIdleCallback(this.handle);
                 }
             };
-            BackgroundScheduler.prototype.handle = function (deadline) {
+            IdleBackgroundScheduler.prototype.handle = function (deadline) {
                 while ((deadline.timeRemaining() > 0 || deadline.didTimeout) && this.queue.length > 0) {
                     var task = this.queue.shift();
                     task.handler.handle(task.entry);
@@ -275,10 +275,36 @@ var Logging;
                     this.isHandling = 0;
                 }
             };
-            return BackgroundScheduler;
-        }());
-        Scheduler.BackgroundScheduler = BackgroundScheduler;
-    })(Scheduler = Logging.Scheduler || (Logging.Scheduler = {}));
+            IdleBackgroundScheduler.isSupported = function () {
+                return 'requestIdleCallback' in window;
+            };
+            return IdleBackgroundScheduler;
+        }(BaseScheduler));
+        scheduler.IdleBackgroundScheduler = IdleBackgroundScheduler;
+        var BlockingScheduler = (function (_super) {
+            __extends(BlockingScheduler, _super);
+            function BlockingScheduler(timeout) {
+                var _this = _super.call(this) || this;
+                _this.timeout = timeout;
+                return _this;
+            }
+            BlockingScheduler.prototype.push = function (handler, entry) {
+                if (this.timeout) {
+                    setTimeout(function () {
+                        handler.handle(entry);
+                    }, this.timeout);
+                }
+                else {
+                    handler.handle(entry);
+                }
+            };
+            BlockingScheduler.isSupported = function () {
+                return true;
+            };
+            return BlockingScheduler;
+        }(BaseScheduler));
+        scheduler.BlockingScheduler = BlockingScheduler;
+    })(scheduler = Logging.scheduler || (Logging.scheduler = {}));
 })(Logging || (Logging = {}));
 var Logging;
 (function (Logging) {
@@ -290,7 +316,7 @@ var Logging;
                 options = options || {};
                 this.collectors = options.collectors || BaseLogger.DEFAULTCOLLECTORS;
                 this.handlers = options.handlers || [];
-                this.scheduler = options.scheduler || new Logging.Scheduler.BackgroundScheduler();
+                this.scheduler = options.scheduler || Logging.scheduler.IdleBackgroundScheduler.isSupported() ? new Logging.scheduler.IdleBackgroundScheduler() : new Logging.scheduler.BlockingScheduler();
             }
             BaseLogger.prototype.toArray = function (iterable) {
                 var output = [];
@@ -308,8 +334,13 @@ var Logging;
                 return data;
             };
             BaseLogger.prototype.gatherMetadata = function () {
+                var now = new Date();
                 return {
-                    timestamp: new Date,
+                    timestamp: {
+                        value: now,
+                        offset: now.getTimezoneOffset(),
+                        timestamp: now.getTime()
+                    },
                     data: this.collect(),
                     type: this.LOGENTRYTYPE,
                     environment: window ? 'Browser' : 'NodeJS'

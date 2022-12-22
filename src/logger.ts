@@ -42,8 +42,13 @@ namespace Logging {
       }
 
       protected gatherMetadata(): LogEntryMetadata {
+          const now = new Date();
           return {
-            timestamp: new Date,
+            timestamp: {
+              value: now,
+              offset: now.getTimezoneOffset(),
+              timestamp: now.getTime()
+            },
             data: this.collect(),
             type: this.LOGENTRYTYPE,
             environment: window ? 'Browser' : 'NodeJS'

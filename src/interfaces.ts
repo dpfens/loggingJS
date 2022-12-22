@@ -2,8 +2,14 @@ interface DataCollector {
   collect(): any;
 }
 
+interface Timestamp {
+  value: Date,
+  offset: number,
+  timestamp: number
+}
+
 interface LogEntryMetadata {
-  timestamp: Date,
+  timestamp: Timestamp,
   type: string,
   environment: string,
   data: any

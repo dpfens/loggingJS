@@ -1,8 +1,13 @@
 interface DataCollector {
     collect(): any;
 }
+interface Timestamp {
+    value: Date;
+    offset: number;
+    timestamp: number;
+}
 interface LogEntryMetadata {
-    timestamp: Date;
+    timestamp: Timestamp;
     type: string;
     environment: string;
     data: any;
@@ -61,15 +66,26 @@ interface Task {
     entry: BaseLogEntry;
 }
 declare namespace Logging {
-    namespace Scheduler {
-        class BackgroundScheduler {
+    namespace scheduler {
+        abstract class BaseScheduler {
+            abstract push(handler: EntryHandler, entry: BaseLogEntry): void;
+            static isSupported(): boolean;
+        }
+        class IdleBackgroundScheduler extends BaseScheduler {
             protected queue: Array<Task>;
             protected isHandling: number;
             protected timeout?: number;
             constructor(timeout?: number);
             push(handler: EntryHandler, entry: BaseLogEntry): void;
-            startIdleProcessing(): void;
-            handle(deadline: IdleDeadline): void;
+            protected startIdleProcessing(): void;
+            protected handle(deadline: IdleDeadline): void;
+            static isSupported(): boolean;
+        }
+        class BlockingScheduler extends BaseScheduler {
+            protected timeout?: number;
+            constructor(timeout?: number);
+            push(handler: EntryHandler, entry: BaseLogEntry): void;
+            static isSupported(): boolean;
         }
     }
 }
@@ -78,7 +94,7 @@ declare namespace Logging {
         class BaseLogger {
             protected readonly collectors: Record<string, DataCollector>;
             protected readonly handlers: Array<EntryHandler>;
-            protected readonly scheduler: Logging.Scheduler.BackgroundScheduler;
+            protected readonly scheduler: Logging.scheduler.BaseScheduler;
             LOGENTRYTYPE: string;
             static DEFAULTCOLLECTORS: Record<string, DataCollector>;
             constructor(options?: any);
