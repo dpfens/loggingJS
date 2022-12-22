@@ -45,6 +45,7 @@ namespace Logging {
 
       collect(): any {
         return {
+          visibilityState: document.visibilityState,
           devicePixelRatio: window.devicePixelRatio,
           innerHeight: window.innerHeight,
           innerWidth: window.innerWidth,
@@ -110,7 +111,7 @@ namespace Logging {
           return output;
         }
       }
-      
+
     }
 
   }
