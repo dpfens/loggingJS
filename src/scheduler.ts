@@ -5,6 +5,7 @@ interface Task {
   entry: BaseLogEntry
 }
 
+
 namespace Logging {
   export namespace scheduler {
 
@@ -90,6 +91,37 @@ namespace Logging {
         return true;
       }
 
+    }
+
+
+    export class PrioritizedTaskScheduler extends BaseScheduler {
+      protected priority: string;
+      public controller: any;
+
+      constructor(priority='background') {
+        super();
+        this.priority = priority;
+        this.controller = new (window as any).TaskController({ priority: priority });
+      }
+
+      public push(handler: EntryHandler, entry: BaseLogEntry): void {
+        (window as any).scheduler.postTask(function() {
+          handler.handle(entry);
+        }, { signal: this.controller.signal });
+      }
+
+      public abort(): void {
+        this.controller.abort();
+      }
+
+      public setPriority(priority: string): void {
+        this.priority = priority;
+        this.controller.setPriority(priority);
+      }
+
+      public static isSupported(): boolean {
+        return 'scheduler' in window;
+      }
     }
 
   }

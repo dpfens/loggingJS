@@ -321,6 +321,33 @@ var Logging;
             return BlockingScheduler;
         }(BaseScheduler));
         scheduler.BlockingScheduler = BlockingScheduler;
+        var PrioritizedTaskScheduler = (function (_super) {
+            __extends(PrioritizedTaskScheduler, _super);
+            function PrioritizedTaskScheduler(priority) {
+                if (priority === void 0) { priority = 'background'; }
+                var _this = _super.call(this) || this;
+                _this.priority = priority;
+                _this.controller = new window.TaskController({ priority: priority });
+                return _this;
+            }
+            PrioritizedTaskScheduler.prototype.push = function (handler, entry) {
+                window.scheduler.postTask(function () {
+                    handler.handle(entry);
+                }, { signal: this.controller.signal });
+            };
+            PrioritizedTaskScheduler.prototype.abort = function () {
+                this.controller.abort();
+            };
+            PrioritizedTaskScheduler.prototype.setPriority = function (priority) {
+                this.priority = priority;
+                this.controller.setPriority(priority);
+            };
+            PrioritizedTaskScheduler.isSupported = function () {
+                return 'scheduler' in window;
+            };
+            return PrioritizedTaskScheduler;
+        }(BaseScheduler));
+        scheduler.PrioritizedTaskScheduler = PrioritizedTaskScheduler;
     })(scheduler = Logging.scheduler || (Logging.scheduler = {}));
 })(Logging || (Logging = {}));
 var Logging;
@@ -342,7 +369,9 @@ var Logging;
                 }
                 this.collectors = collectors;
                 this.handlers = options.handlers || [];
-                this.scheduler = options.scheduler || Logging.scheduler.IdleBackgroundScheduler.isSupported() ? new Logging.scheduler.IdleBackgroundScheduler() : new Logging.scheduler.BlockingScheduler();
+                console.log(options);
+                this.scheduler = options.scheduler || (Logging.scheduler.IdleBackgroundScheduler.isSupported() ? new Logging.scheduler.IdleBackgroundScheduler() : new Logging.scheduler.BlockingScheduler());
+                console.log(this.scheduler);
             }
             BaseLogger.prototype.toArray = function (iterable) {
                 var output = [];

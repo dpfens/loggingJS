@@ -20,7 +20,8 @@
   <script type="text/javascript">
   var serverHandler = new Logging.handler.RESTHandler('test/logging/messages'),
     logHandlers = [serverHandler],
-    logger = new Logging.logger.MessageLogger({handlers: logHandlers});
+    taskScheduler = new Logging.scheduler.PrioritizedTaskScheduler(),
+    logger = new Logging.logger.MessageLogger({handlers: logHandlers, scheduler: taskScheduler});
 
     logger.info('This is a test');
   </script>

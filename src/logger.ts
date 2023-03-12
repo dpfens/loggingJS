@@ -29,7 +29,7 @@ namespace Logging {
         }
         this.collectors = collectors;
         this.handlers = options.handlers || [];
-        this.scheduler = options.scheduler || Logging.scheduler.IdleBackgroundScheduler.isSupported() ? new Logging.scheduler.IdleBackgroundScheduler() : new Logging.scheduler.BlockingScheduler();
+        this.scheduler = options.scheduler || (Logging.scheduler.IdleBackgroundScheduler.isSupported() ? new Logging.scheduler.IdleBackgroundScheduler() : new Logging.scheduler.BlockingScheduler());
       }
 
       protected toArray(iterable: any): Array<any> {

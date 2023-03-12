@@ -89,6 +89,15 @@ declare namespace Logging {
             push(handler: EntryHandler, entry: BaseLogEntry): void;
             static isSupported(): boolean;
         }
+        class PrioritizedTaskScheduler extends BaseScheduler {
+            protected priority: string;
+            controller: any;
+            constructor(priority?: string);
+            push(handler: EntryHandler, entry: BaseLogEntry): void;
+            abort(): void;
+            setPriority(priority: string): void;
+            static isSupported(): boolean;
+        }
     }
 }
 declare namespace Logging {
