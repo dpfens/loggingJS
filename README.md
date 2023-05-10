@@ -21,7 +21,22 @@ logger.info('This is a test');
 ```
 
 ## Model
-The library is broken up into 3 main components, `loggers`, `collectors`, and `handlers`, which can be composed/extended to create the logging structure that you need.
+The library is broken up into 4 main components, `loggers`, `collectors`, `handlers`, and `schedulers`, which can be composed/extended to create the logging structure that you need.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    User->>Logger:  Create logger
+    User->>Logger: Send message
+    Logger->>Collectors: Collect data 
+    Collectors->>Logger: Return data
+    Logger->>Logger: Create entry of message & collector data
+    Logger->>Scheduler: Add entry to end of queue
+    loop Every unprocessed entry
+        Scheduler->>Handler:  Execute handling logic on entry
+        Scheduler->>Scheduler: Remove processed entry
+    end
+```
 
 
 ### Loggers
