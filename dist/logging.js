@@ -151,6 +151,86 @@ var Logging;
 })(Logging || (Logging = {}));
 var Logging;
 (function (Logging) {
+    var entry;
+    (function (entry) {
+        var BaseEntry = (function () {
+            function BaseEntry(type, metadata) {
+                this.type = type;
+                this.metadata = metadata;
+            }
+            BaseEntry.prototype.getMessage = function () {
+                throw Error('message is undefined');
+            };
+            BaseEntry.prototype.toJSON = function () {
+                return {
+                    type: this.type,
+                    metadata: this.metadata
+                };
+            };
+            BaseEntry.prototype.stringify = function () {
+                return JSON.stringify(this);
+            };
+            return BaseEntry;
+        }());
+        entry.BaseEntry = BaseEntry;
+        var MessageEntry = (function (_super) {
+            __extends(MessageEntry, _super);
+            function MessageEntry(type, metadata, args) {
+                var _this = _super.call(this, type, metadata) || this;
+                _this.arguments = args;
+                return _this;
+            }
+            MessageEntry.prototype.getMessage = function () {
+                return this.arguments.join(' ');
+            };
+            MessageEntry.prototype.toJSON = function () {
+                console.log('test');
+                var output = _super.prototype.toJSON.call(this);
+                output.arguments = this.arguments;
+                return output;
+            };
+            return MessageEntry;
+        }(BaseEntry));
+        entry.MessageEntry = MessageEntry;
+        var EventEntry = (function (_super) {
+            __extends(EventEntry, _super);
+            function EventEntry(type, metadata, event) {
+                var _this = _super.call(this, type, metadata) || this;
+                _this.event = event;
+                return _this;
+            }
+            EventEntry.prototype.getMessage = function () {
+                return this.event.message;
+            };
+            EventEntry.prototype.toJSON = function () {
+                var output = _super.prototype.toJSON.call(this);
+                output.event = JSON.parse(this.stringifyEvent(this.event));
+                return output;
+            };
+            EventEntry.prototype.stringifyEvent = function (event) {
+                var obj = {};
+                for (var k in event) {
+                    obj[k] = event[k];
+                }
+                return JSON.stringify(obj, function (key, value) {
+                    if (value instanceof Node)
+                        return 'Node';
+                    if (value instanceof Window)
+                        return 'Window';
+                    if (value instanceof Error) {
+                        return { message: value.message, stack: value.stack };
+                    }
+                    ;
+                    return value;
+                }, ' ');
+            };
+            return EventEntry;
+        }(BaseEntry));
+        entry.EventEntry = EventEntry;
+    })(entry = Logging.entry || (Logging.entry = {}));
+})(Logging || (Logging = {}));
+var Logging;
+(function (Logging) {
     var handler;
     (function (handler) {
         var RESTHandler = (function () {
@@ -212,12 +292,25 @@ var Logging;
             HTMLHandler.prototype.isSupported = function () {
                 return typeof window !== 'undefined';
             };
+            HTMLHandler.prototype.buildTimestampElement = function (timestamp) {
+                var entryDate = new Date(timestamp * 1000), timestampFormatted = entryDate.toLocaleDateString() + ' ' + entryDate.toLocaleTimeString(), element = document.createElement('time');
+                element.textContent = timestampFormatted;
+                return element;
+            };
+            HTMLHandler.prototype.buildArgumentsElement = function (message, type) {
+                var element = document.createElement('span'), color = this.MESSAGELEVELS[type];
+                element.setAttribute('class', 'message');
+                element.style.color = color;
+                element.textContent = message;
+                return element;
+            };
             HTMLHandler.prototype.render = function (entry) {
-                var output = '';
-                return output;
+                var type = entry.type, color = this.MESSAGELEVELS[type], timestampElement = this.buildTimestampElement(entry.metadata.timestamp), element = document.createElement('div');
+                return element;
             };
             HTMLHandler.prototype.handle = function (entry) {
-                this.element.innerHTML += this.render(entry);
+                var entryElement = this.render(entry);
+                this.element.appendChild(entryElement);
                 return true;
             };
             return HTMLHandler;
@@ -369,9 +462,7 @@ var Logging;
                 }
                 this.collectors = collectors;
                 this.handlers = options.handlers || [];
-                console.log(options);
                 this.scheduler = options.scheduler || (Logging.scheduler.IdleBackgroundScheduler.isSupported() ? new Logging.scheduler.IdleBackgroundScheduler() : new Logging.scheduler.BlockingScheduler());
-                console.log(this.scheduler);
             }
             BaseLogger.prototype.toArray = function (iterable) {
                 var output = [];
@@ -428,78 +519,47 @@ var Logging;
                 this.entries.splice(0, this.entries.length);
             };
             MessageLogger.prototype.assert = function () {
-                var assertion = arguments[0];
-                if (!assertion) {
-                    return false;
+                var args = this.toArray(arguments);
+                var assertion = args.shift();
+                if (assertion) {
+                    return;
                 }
-                var entry = {
-                    type: 'ASSERT',
-                    arguments: this.toArray(arguments),
-                    metadata: this.gatherMetadata()
-                };
+                var entry = new Logging.entry.MessageEntry('ASSERT', this.gatherMetadata(), args);
                 this.entries.push(entry);
                 this.executeHandlers(entry);
             };
             MessageLogger.prototype.clear = function () {
-                var entry = {
-                    type: 'CLEAR',
-                    arguments: this.toArray(arguments),
-                    metadata: this.gatherMetadata()
-                };
+                var entry = new Logging.entry.MessageEntry('CLEAR', this.gatherMetadata(), this.toArray(arguments));
                 this.entries.push(entry);
                 this.executeHandlers(entry);
             };
             MessageLogger.prototype.debug = function () {
-                var entry = {
-                    type: 'DEBUG',
-                    arguments: this.toArray(arguments),
-                    metadata: this.gatherMetadata()
-                };
+                var entry = new Logging.entry.MessageEntry('DEBUG', this.gatherMetadata(), this.toArray(arguments));
                 this.entries.push(entry);
                 this.executeHandlers(entry);
             };
             MessageLogger.prototype.error = function () {
-                var entry = {
-                    type: 'ERROR',
-                    arguments: this.toArray(arguments),
-                    metadata: this.gatherMetadata()
-                };
+                var entry = new Logging.entry.MessageEntry('ERROR', this.gatherMetadata(), this.toArray(arguments));
                 this.entries.push(entry);
                 this.executeHandlers(entry);
             };
             MessageLogger.prototype.info = function () {
-                var entry = {
-                    type: 'INFO',
-                    arguments: this.toArray(arguments),
-                    metadata: this.gatherMetadata()
-                };
+                var entry = new Logging.entry.MessageEntry('INFO', this.gatherMetadata(), this.toArray(arguments));
                 this.entries.push(entry);
                 this.executeHandlers(entry);
             };
             MessageLogger.prototype.log = function () {
-                var entry = {
-                    type: 'LOG',
-                    arguments: this.toArray(arguments),
-                    metadata: this.gatherMetadata()
-                };
+                var entry = new Logging.entry.MessageEntry('LOG', this.gatherMetadata(), this.toArray(arguments));
                 this.entries.push(entry);
                 this.executeHandlers(entry);
             };
             MessageLogger.prototype.warn = function () {
-                var entry = {
-                    type: 'WARN',
-                    arguments: this.toArray(arguments),
-                    metadata: this.gatherMetadata()
-                };
+                var entry = new Logging.entry.MessageEntry('WARN', this.gatherMetadata(), this.toArray(arguments));
                 this.entries.push(entry);
                 this.executeHandlers(entry);
             };
             MessageLogger.prototype.group = function () {
-                var entry = {
-                    type: 'GROUP',
-                    arguments: this.toArray(arguments),
-                    metadata: this.gatherMetadata()
-                };
+                var entry = new Logging.entry.MessageEntry('GROUP', this.gatherMetadata(), this.toArray(arguments));
                 this.entries.push(entry);
                 this.executeHandlers(entry);
                 if (arguments.length > 0) {
@@ -508,11 +568,7 @@ var Logging;
                 }
             };
             MessageLogger.prototype.groupEnd = function () {
-                var entry = {
-                    type: 'GROUPEND',
-                    arguments: this.toArray(arguments),
-                    metadata: this.gatherMetadata()
-                };
+                var entry = new Logging.entry.MessageEntry('GROUPEND', this.gatherMetadata(), this.toArray(arguments));
                 this.entries.push(entry);
                 this.executeHandlers(entry);
                 this.groups.pop();
@@ -528,29 +584,8 @@ var Logging;
                 _this.handle = _this.handle.bind(_this);
                 return _this;
             }
-            EventLogger.prototype.stringifyEvent = function (event) {
-                var obj = {};
-                for (var k in event) {
-                    obj[k] = event[k];
-                }
-                return JSON.stringify(obj, function (key, value) {
-                    if (value instanceof Node)
-                        return 'Node';
-                    if (value instanceof Window)
-                        return 'Window';
-                    if (value instanceof Error) {
-                        return { message: value.message, stack: value.stack };
-                    }
-                    ;
-                    return value;
-                }, ' ');
-            };
             EventLogger.prototype.handle = function (event) {
-                var eventData = JSON.parse(this.stringifyEvent(event)), entry = {
-                    type: event.type,
-                    metadata: this.gatherMetadata(),
-                    event: eventData
-                };
+                var entry = new Logging.entry.EventEntry(event.type.toUpperCase(), this.gatherMetadata(), event);
                 this.executeHandlers(entry);
                 return true;
             };

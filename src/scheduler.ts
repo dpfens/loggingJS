@@ -74,7 +74,7 @@ namespace Logging {
 
       constructor(timeout?: number) {
         super();
-        this.timeout = timeout;
+        this.timeout = timeout || 0;
       }
 
       public push(handler: EntryHandler, entry: BaseLogEntry): void {

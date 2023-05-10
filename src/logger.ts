@@ -1,5 +1,6 @@
 /// <reference path="interfaces.ts" />
 /// <reference path="collectors/browser.ts" />
+/// <reference path="entry.ts" />
 /// <reference path="handler.ts" />
 /// <reference path="scheduler.ts" />
 
@@ -87,85 +88,54 @@ namespace Logging {
       }
 
       public assert() {
-        var assertion = arguments[0];
-        if (!assertion) {
-          return false;
+        var args = this.toArray(arguments);
+        var assertion = args.shift();
+        if (assertion) {
+          return;
         }
-        const entry: LogEntry = {
-            type: 'ASSERT',
-            arguments: this.toArray(arguments),
-            metadata: this.gatherMetadata()
-          };
+        const entry: Logging.entry.MessageEntry = new Logging.entry.MessageEntry('ASSERT', this.gatherMetadata(), args);
         this.entries.push(entry);
         this.executeHandlers(entry);
       }
 
       public clear() {
-        const entry: LogEntry = {
-            type: 'CLEAR',
-            arguments: this.toArray(arguments),
-            metadata: this.gatherMetadata()
-          };
+        const entry: Logging.entry.MessageEntry = new Logging.entry.MessageEntry('CLEAR', this.gatherMetadata(), this.toArray(arguments));
         this.entries.push(entry);
         this.executeHandlers(entry);
       }
 
       public debug() {
-        const entry: LogEntry = {
-            type: 'DEBUG',
-            arguments: this.toArray(arguments),
-            metadata: this.gatherMetadata()
-          };
+        const entry: Logging.entry.MessageEntry = new Logging.entry.MessageEntry('DEBUG', this.gatherMetadata(), this.toArray(arguments));
         this.entries.push(entry);
         this.executeHandlers(entry);
       }
 
       public error() {
-        const entry: LogEntry = {
-            type: 'ERROR',
-            arguments: this.toArray(arguments),
-            metadata: this.gatherMetadata()
-          };
+        const entry: Logging.entry.MessageEntry = new Logging.entry.MessageEntry('ERROR', this.gatherMetadata(), this.toArray(arguments));
         this.entries.push(entry);
         this.executeHandlers(entry);
       }
 
       public info() {
-        const entry: LogEntry = {
-            type: 'INFO',
-            arguments: this.toArray(arguments),
-            metadata: this.gatherMetadata()
-          };
+        const entry: Logging.entry.MessageEntry = new Logging.entry.MessageEntry('INFO', this.gatherMetadata(), this.toArray(arguments));
         this.entries.push(entry);
         this.executeHandlers(entry);
       }
 
       public log() {
-        const entry: LogEntry = {
-            type: 'LOG',
-            arguments: this.toArray(arguments),
-            metadata: this.gatherMetadata()
-          };
+        const entry: Logging.entry.MessageEntry = new Logging.entry.MessageEntry('LOG', this.gatherMetadata(), this.toArray(arguments));
         this.entries.push(entry);
         this.executeHandlers(entry);
       }
 
       public warn() {
-        const entry: LogEntry = {
-            type: 'WARN',
-            arguments: this.toArray(arguments),
-            metadata: this.gatherMetadata()
-          };
+        const entry: Logging.entry.MessageEntry = new Logging.entry.MessageEntry('WARN', this.gatherMetadata(), this.toArray(arguments));
         this.entries.push(entry);
         this.executeHandlers(entry);
       }
 
       public group() {
-        const entry: LogEntry = {
-            type: 'GROUP',
-            arguments: this.toArray(arguments),
-            metadata: this.gatherMetadata()
-          };
+        const entry: Logging.entry.MessageEntry = new Logging.entry.MessageEntry('GROUP', this.gatherMetadata(), this.toArray(arguments));
         this.entries.push(entry);
         this.executeHandlers(entry);
 
@@ -176,11 +146,7 @@ namespace Logging {
       }
 
       public groupEnd() {
-        const entry: LogEntry = {
-            type: 'GROUPEND',
-            arguments: this.toArray(arguments),
-            metadata: this.gatherMetadata()
-          };
+        const entry: Logging.entry.MessageEntry = new Logging.entry.MessageEntry('GROUPEND', this.gatherMetadata(), this.toArray(arguments));
         this.entries.push(entry);
         this.executeHandlers(entry);
         this.groups.pop();
@@ -195,26 +161,8 @@ namespace Logging {
         this.handle = this.handle.bind(this);
       }
 
-      stringifyEvent(event: Event) {
-        const obj: any = {};
-        for (let k in event) {
-          obj[k] = event[k as keyof Event];
-        }
-        return JSON.stringify(obj, function(key, value) {
-          if (value instanceof Node) return 'Node';
-          if (value instanceof Window) return 'Window';
-          if (value instanceof Error) {return { message: value.message, stack: value.stack }};
-          return value;
-        }, ' ');
-      }
-
-      handle(event: Event): boolean {
-        const eventData: any = JSON.parse(this.stringifyEvent(event)),
-          entry: LogEventEntry = {
-            type: event.type,
-            metadata: this.gatherMetadata(),
-            event: eventData
-          };
+      handle(event: ErrorEvent): boolean {
+        const entry: Logging.entry.EventEntry = new Logging.entry.EventEntry(event.type.toUpperCase(), this.gatherMetadata(), event);
         this.executeHandlers(entry);
         return true;
       }

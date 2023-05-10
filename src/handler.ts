@@ -53,7 +53,7 @@ namespace Logging {
       }
     }
 
-    class HTMLHandler implements EntryHandler {
+    export class HTMLHandler implements EntryHandler {
       protected element: HTMLElement;
       protected MESSAGELEVELS: Record<string, string> = {
         'ASSERT': '#5A5A5A',
@@ -76,26 +76,57 @@ namespace Logging {
         return typeof window !== 'undefined';
       }
 
-      render(entry: BaseLogEntry): string {
-        var output = '';
-        return output;
+
+      buildTimestampElement(timestamp: Timestamp): HTMLTimeElement {
+        var entryDate = new Date(timestamp as any * 1000),
+            timestampFormatted = entryDate.toLocaleDateString() + ' ' + entryDate.toLocaleTimeString(),
+            element: HTMLTimeElement = document.createElement('time');
+            element.textContent = timestampFormatted;
+        return element;
+      }
+
+      buildArgumentsElement(message: string, type: string): HTMLSpanElement {
+        var element: HTMLSpanElement = document.createElement('span'),
+            color = this.MESSAGELEVELS[type];
+        element.setAttribute('class', 'message');
+        element.style.color = color;
+        element.textContent = message;
+        return element;
+      }
+
+      buildMetadataElement(metadata: LogEntryMetadata): HTMLDivElement {
+        var element: HTMLDivElement = document.createElement('div');
+        return element;
+      }
+
+      render(entry: BaseLogEntry): HTMLElement {
+        var timestampElement: HTMLTimeElement = this.buildTimestampElement(entry.metadata.timestamp),
+            message = entry.getMessage(),
+            messageElement: HTMLSpanElement = this.buildArgumentsElement(message, entry.type),
+            metadataElement: HTMLDivElement = this.buildMetadataElement(entry.metadata),
+            element: HTMLDivElement = document.createElement('div');
+        element.append(timestampElement, messageElement, metadataElement);
+        return element;
       }
 
       handle(entry: BaseLogEntry): boolean {
-        this.element.innerHTML += this.render(entry);
+        var entryElement = this.render(entry);
+        entryElement.setAttribute('class', 'level-' + entry.type);
+        this.element.appendChild(entryElement);
         return true;
       }
     }
 
     class ConsoleHandler implements EntryHandler {
-
       isSupported(): boolean {
         return typeof console !== 'undefined';
       }
 
       handle(entry: BaseLogEntry): boolean {
-        if (console && console.table) {
-          console.table(entry);
+        var type = entry.type.toLowerCase();
+
+        if (console && (console as any)[type]) {
+          (console as any)[type](entry);
           return true;
         }
         return false;

@@ -20,7 +20,7 @@ interface LogEntry extends BaseLogEntry {
     arguments: Array<any>;
 }
 interface LogEventEntry extends BaseLogEntry {
-    event: any;
+    event: ErrorEvent;
 }
 interface EntryHandler {
     handle(entry: BaseLogEntry): boolean;
@@ -42,6 +42,31 @@ declare namespace Logging {
                 collectMemory(): any;
                 collect(): any;
             }
+        }
+    }
+}
+declare namespace Logging {
+    namespace entry {
+        abstract class BaseEntry implements BaseLogEntry {
+            readonly type: string;
+            readonly metadata: LogEntryMetadata;
+            constructor(type: string, metadata: LogEntryMetadata);
+            getMessage(): string;
+            toJSON(): any;
+            stringify(): string;
+        }
+        class MessageEntry extends BaseEntry implements LogEntry {
+            readonly arguments: Array<any>;
+            constructor(type: string, metadata: LogEntryMetadata, args: Array<any>);
+            getMessage(): string;
+            toJSON(): any;
+        }
+        class EventEntry extends BaseEntry implements LogEventEntry {
+            readonly event: ErrorEvent;
+            constructor(type: string, metadata: LogEntryMetadata, event: ErrorEvent);
+            getMessage(): string;
+            toJSON(): any;
+            stringifyEvent(event: Event): string;
         }
     }
 }
@@ -119,7 +144,7 @@ declare namespace Logging {
             private readonly groups;
             constructor(options?: any);
             truncateLog(): void;
-            assert(): false | undefined;
+            assert(): void;
             clear(): void;
             debug(): void;
             error(): void;
@@ -132,8 +157,7 @@ declare namespace Logging {
         class EventLogger extends BaseLogger implements EventLogger {
             LOGENTRYTYPE: string;
             constructor(options?: any);
-            stringifyEvent(event: Event): string;
-            handle(event: Event): boolean;
+            handle(event: ErrorEvent): boolean;
         }
     }
 }

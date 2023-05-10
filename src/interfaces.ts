@@ -18,6 +18,8 @@ interface LogEntryMetadata {
 interface BaseLogEntry {
   type: string,
   metadata: LogEntryMetadata,
+  getMessage(): string,
+  toJSON(): any
 };
 
 
@@ -26,7 +28,7 @@ interface LogEntry extends BaseLogEntry {
 }
 
 interface LogEventEntry extends BaseLogEntry {
-  event: any
+  event: ErrorEvent
 }
 
 interface EntryHandler {
