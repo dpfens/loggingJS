@@ -15,6 +15,8 @@ interface LogEntryMetadata {
 interface BaseLogEntry {
     type: string;
     metadata: LogEntryMetadata;
+    getMessage(): string;
+    toJSON(): any;
 }
 interface LogEntry extends BaseLogEntry {
     arguments: Array<any>;
@@ -85,6 +87,18 @@ declare namespace Logging {
             handleXMLHTTPRequest(entry: BaseLogEntry): void;
             handle(entry: BaseLogEntry): boolean;
         }
+        export class HTMLHandler implements EntryHandler {
+            protected element: HTMLElement;
+            protected MESSAGELEVELS: Record<string, string>;
+            protected EVENTLEVELS: Record<string, string>;
+            constructor(element: HTMLElement);
+            isSupported(): boolean;
+            buildTimestampElement(timestamp: Timestamp): HTMLTimeElement;
+            buildArgumentsElement(message: string, type: string): HTMLSpanElement;
+            buildMetadataElement(metadata: LogEntryMetadata): HTMLDivElement;
+            render(entry: BaseLogEntry): HTMLElement;
+            handle(entry: BaseLogEntry): boolean;
+        }
         export {};
     }
 }
@@ -136,8 +150,12 @@ declare namespace Logging {
             constructor(options?: any);
             protected toArray(iterable: any): Array<any>;
             protected collect(): any;
+            addCollector(key: string, collector: DataCollector): void;
+            removeCollector(key: string): void;
             protected gatherMetadata(): LogEntryMetadata;
             protected executeHandlers(entry: BaseLogEntry): boolean;
+            addHandler(handler: EntryHandler): void;
+            removeHandler(handler: EntryHandler): void;
         }
         class MessageLogger extends BaseLogger {
             private readonly entries;

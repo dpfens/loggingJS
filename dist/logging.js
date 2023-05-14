@@ -304,17 +304,24 @@ var Logging;
                 element.textContent = message;
                 return element;
             };
+            HTMLHandler.prototype.buildMetadataElement = function (metadata) {
+                var element = document.createElement('div');
+                return element;
+            };
             HTMLHandler.prototype.render = function (entry) {
-                var type = entry.type, color = this.MESSAGELEVELS[type], timestampElement = this.buildTimestampElement(entry.metadata.timestamp), element = document.createElement('div');
+                var timestampElement = this.buildTimestampElement(entry.metadata.timestamp), message = entry.getMessage(), messageElement = this.buildArgumentsElement(message, entry.type), metadataElement = this.buildMetadataElement(entry.metadata), element = document.createElement('div');
+                element.append(timestampElement, messageElement, metadataElement);
                 return element;
             };
             HTMLHandler.prototype.handle = function (entry) {
                 var entryElement = this.render(entry);
+                entryElement.setAttribute('class', 'level-' + entry.type);
                 this.element.appendChild(entryElement);
                 return true;
             };
             return HTMLHandler;
         }());
+        handler.HTMLHandler = HTMLHandler;
         var ConsoleHandler = (function () {
             function ConsoleHandler() {
             }
@@ -322,8 +329,9 @@ var Logging;
                 return typeof console !== 'undefined';
             };
             ConsoleHandler.prototype.handle = function (entry) {
-                if (console && console.table) {
-                    console.table(entry);
+                var type = entry.type.toLowerCase();
+                if (console && console[type]) {
+                    console[type](entry);
                     return true;
                 }
                 return false;
@@ -395,7 +403,7 @@ var Logging;
             __extends(BlockingScheduler, _super);
             function BlockingScheduler(timeout) {
                 var _this = _super.call(this) || this;
-                _this.timeout = timeout;
+                _this.timeout = timeout || 0;
                 return _this;
             }
             BlockingScheduler.prototype.push = function (handler, entry) {
@@ -479,6 +487,16 @@ var Logging;
                 }
                 return data;
             };
+            BaseLogger.prototype.addCollector = function (key, collector) {
+                if (!(key in this.collectors)) {
+                    this.collectors[key] = collector;
+                }
+            };
+            BaseLogger.prototype.removeCollector = function (key) {
+                if (key in this.collectors) {
+                    delete this.collectors[key];
+                }
+            };
             BaseLogger.prototype.gatherMetadata = function () {
                 var now = new Date();
                 return {
@@ -498,6 +516,17 @@ var Logging;
                     this.scheduler.push(handler, entry);
                 }
                 return true;
+            };
+            BaseLogger.prototype.addHandler = function (handler) {
+                if (this.handlers.indexOf(handler) === -1) {
+                    this.handlers.push(handler);
+                }
+            };
+            BaseLogger.prototype.removeHandler = function (handler) {
+                var index = this.handlers.indexOf(handler);
+                if (index > -1) {
+                    this.handlers.splice(index, 1);
+                }
             };
             BaseLogger.DEFAULTBROWSERCOLLECTORS = {
                 'navigation': new Logging.collector.browser.NavigationCollector(),

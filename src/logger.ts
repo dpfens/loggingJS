@@ -50,6 +50,18 @@ namespace Logging {
         return data;
       }
 
+      public addCollector(key: string, collector: DataCollector): void {
+        if (!(key in this.collectors)) {
+          this.collectors[key] = collector;
+        }
+      }
+
+      public removeCollector(key: string): void {
+        if (key in this.collectors) {
+          delete this.collectors[key];
+        }
+      }
+
       protected gatherMetadata(): LogEntryMetadata {
           const now = new Date();
           return {
@@ -70,6 +82,19 @@ namespace Logging {
           this.scheduler.push(handler, entry);
         }
         return true;
+      }
+
+      public addHandler(handler: EntryHandler): void {
+        if (this.handlers.indexOf(handler) === -1) {
+          this.handlers.push(handler);
+        }
+      }
+
+      public removeHandler(handler: EntryHandler): void {
+        var index = this.handlers.indexOf(handler);
+        if (index > -1) {
+          this.handlers.splice(index, 1);
+        }
       }
     }
 
