@@ -184,7 +184,6 @@ var Logging;
                 return this.arguments.join(' ');
             };
             MessageEntry.prototype.toJSON = function () {
-                console.log('test');
                 var output = _super.prototype.toJSON.call(this);
                 output.arguments = this.arguments;
                 return output;
@@ -207,14 +206,28 @@ var Logging;
                 output.event = JSON.parse(this.stringifyEvent(this.event));
                 return output;
             };
+            EventEntry.prototype.generateQuerySelector = function (node) {
+                if (node.tagName.toLowerCase() == "html")
+                    return "html";
+                var str = node.tagName.toLowerCase();
+                str += (node.id != "") ? "#" + node.id : "";
+                if (node.className) {
+                    var classes = node.className.split(/\s/);
+                    for (var i = 0; i < classes.length; i++) {
+                        str += "." + classes[i];
+                    }
+                }
+                return this.generateQuerySelector(node.parentNode) + " > " + str;
+            };
             EventEntry.prototype.stringifyEvent = function (event) {
                 var obj = {};
                 for (var k in event) {
                     obj[k] = event[k];
                 }
+                var self = this;
                 return JSON.stringify(obj, function (key, value) {
                     if (value instanceof Node)
-                        return 'Node';
+                        return self.generateQuerySelector(value);
                     if (value instanceof Window)
                         return 'Window';
                     if (value instanceof Error) {

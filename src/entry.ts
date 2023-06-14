@@ -42,7 +42,6 @@ namespace Logging {
             }
 
             toJSON(): any {
-                console.log('test');
                 var output = super.toJSON();
                 output.arguments = this.arguments;
                 return output;
@@ -67,13 +66,28 @@ namespace Logging {
                 return output;
             }
 
+            generateQuerySelector(node: HTMLElement): string {
+                if (node.tagName.toLowerCase() == "html")
+                    return "html";
+                var str = node.tagName.toLowerCase();
+                str += (node.id != "") ? "#" + node.id : "";
+                if (node.className) {
+                    var classes = node.className.split(/\s/);
+                    for (var i = 0; i < classes.length; i++) {
+                        str += "." + classes[i];
+                    }
+                }
+                return this.generateQuerySelector(node.parentNode as HTMLElement) + " > " + str;
+            }
+
             stringifyEvent(event: Event): string {
                 const obj: any = {};
                 for (let k in event) {
                   obj[k] = event[k as keyof Event];
                 }
+                const self = this;
                 return JSON.stringify(obj, function(key, value) {
-                  if (value instanceof Node) return 'Node';
+                  if (value instanceof Node) return self.generateQuerySelector(value as HTMLElement);
                   if (value instanceof Window) return 'Window';
                   if (value instanceof Error) {return { message: value.message, stack: value.stack }};
                   return value;

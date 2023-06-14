@@ -68,6 +68,7 @@ declare namespace Logging {
             constructor(type: string, metadata: LogEntryMetadata, event: ErrorEvent);
             getMessage(): string;
             toJSON(): any;
+            generateQuerySelector(node: HTMLElement): string;
             stringifyEvent(event: Event): string;
         }
     }
