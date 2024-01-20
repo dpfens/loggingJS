@@ -14,6 +14,7 @@ namespace Logging {
               appVersion: (navigator as any).appVersion,
               cookieEnabled: navigator.cookieEnabled,
               deviceConcurrency: (navigator as any).deviceConcurrency,
+              deviceMemory: (navigator as any).deviceMemory,
               doNotTrack: navigator.doNotTrack,
               language: navigator.language,
               languages: navigator.languages,

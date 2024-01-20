@@ -31,6 +31,7 @@ var Logging;
                         appVersion: navigator.appVersion,
                         cookieEnabled: navigator.cookieEnabled,
                         deviceConcurrency: navigator.deviceConcurrency,
+                        deviceMemory: navigator.deviceMemory,
                         doNotTrack: navigator.doNotTrack,
                         language: navigator.language,
                         languages: navigator.languages,
