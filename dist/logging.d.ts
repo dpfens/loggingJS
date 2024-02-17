@@ -44,6 +44,20 @@ declare namespace Logging {
                 collectMemory(): any;
                 collect(): any;
             }
+            class BaseIDCollector {
+                static _id: string;
+                static uniqueId(): string;
+            }
+            class PageIDCollector extends BaseIDCollector implements DataCollector {
+                static _id: string;
+                collect(): any;
+            }
+            class SessionIDCollector extends BaseIDCollector implements DataCollector {
+                private _id;
+                private key;
+                constructor(key: string);
+                collect(): any;
+            }
         }
     }
 }

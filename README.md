@@ -47,6 +47,8 @@ By default, Loggers are attached with the following `Logging.logger.BaseLogger.D
 * `Logging.collector.browser.NavigationCollector` - Collects information from the `window.navigator` object.
 * `Logging.collector.browser.ScreenCollector` - Collects information about the screen of the current user from `window` and `window.screen`.
 * `Logging.collector.browser.PerformanceCollector` - Collects information about the `window.performance` and `Performance entries`.
+* `Logging.collector.browser.PageIDCollector` - Generates a unique ID for each page load.
+* `Logging.collector.browser.SessionIDCollector` - Generates a unique ID for each browser session.
 
 ### Collectors
 Collectors gather information about the environment at the time an event/message is logged.  These collectors read about the current state of the page/browser/etc.  Collectors must implement a `collect` method which returns the collected data to the `Logger`.  New collectors can be added created by developers to include application-specific data about the current state of their application at the time of an event/message.

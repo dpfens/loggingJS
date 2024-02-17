@@ -147,6 +147,56 @@ var Logging;
                 return PerformanceCollector;
             }());
             browser.PerformanceCollector = PerformanceCollector;
+            var BaseIDCollector = (function () {
+                function BaseIDCollector() {
+                }
+                BaseIDCollector.uniqueId = function () {
+                    if (crypto && crypto.randomUUID) {
+                        return crypto.randomUUID();
+                    }
+                    return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, function (c) {
+                        return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16);
+                    });
+                };
+                return BaseIDCollector;
+            }());
+            browser.BaseIDCollector = BaseIDCollector;
+            var PageIDCollector = (function (_super) {
+                __extends(PageIDCollector, _super);
+                function PageIDCollector() {
+                    return _super !== null && _super.apply(this, arguments) || this;
+                }
+                PageIDCollector.prototype.collect = function () {
+                    if (!PageIDCollector._id) {
+                        PageIDCollector._id = PageIDCollector.uniqueId();
+                    }
+                    return PageIDCollector._id;
+                };
+                return PageIDCollector;
+            }(BaseIDCollector));
+            browser.PageIDCollector = PageIDCollector;
+            var SessionIDCollector = (function (_super) {
+                __extends(SessionIDCollector, _super);
+                function SessionIDCollector(key) {
+                    var _this = _super.call(this) || this;
+                    _this._id;
+                    _this.key = key;
+                    return _this;
+                }
+                SessionIDCollector.prototype.collect = function () {
+                    if (!this._id) {
+                        var persistedValue = sessionStorage.getItem(this.key);
+                        if (!persistedValue) {
+                            persistedValue = SessionIDCollector.uniqueId();
+                            sessionStorage.setItem(this.key, persistedValue);
+                        }
+                        this._id = persistedValue;
+                    }
+                    return this._id;
+                };
+                return SessionIDCollector;
+            }(BaseIDCollector));
+            browser.SessionIDCollector = SessionIDCollector;
         })(browser = collector.browser || (collector.browser = {}));
     })(collector = Logging.collector || (Logging.collector = {}));
 })(Logging || (Logging = {}));
@@ -545,7 +595,9 @@ var Logging;
             BaseLogger.DEFAULTBROWSERCOLLECTORS = {
                 'navigation': new Logging.collector.browser.NavigationCollector(),
                 'screen': new Logging.collector.browser.ScreenCollector(),
-                'performance': new Logging.collector.browser.PerformanceCollector()
+                'performance': new Logging.collector.browser.PerformanceCollector(),
+                'pageID': new Logging.collector.browser.PageIDCollector(),
+                'sessionID': new Logging.collector.browser.SessionIDCollector('LoggingJS_SessionID')
             };
             return BaseLogger;
         }());

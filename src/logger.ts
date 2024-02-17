@@ -8,6 +8,7 @@ namespace Logging {
   export namespace logger {
 
     export class BaseLogger {
+
       protected readonly collectors: Record<string, DataCollector>;
       protected readonly handlers: Array<EntryHandler>;
       protected readonly scheduler: Logging.scheduler.BaseScheduler;
@@ -15,7 +16,9 @@ namespace Logging {
       static DEFAULTBROWSERCOLLECTORS: Record<string, DataCollector> = {
         'navigation': new Logging.collector.browser.NavigationCollector(),
         'screen': new Logging.collector.browser.ScreenCollector(),
-        'performance': new Logging.collector.browser.PerformanceCollector()
+        'performance': new Logging.collector.browser.PerformanceCollector(),
+        'pageID': new Logging.collector.browser.PageIDCollector(),
+        'sessionID': new Logging.collector.browser.SessionIDCollector('LoggingJS_SessionID')
       };
 
       constructor(options?: any) {

@@ -133,6 +133,54 @@ namespace Logging {
 
       }
 
+      export class BaseIDCollector {
+        static _id: string;
+
+        static uniqueId() {
+          if (crypto && crypto.randomUUID) {
+              return crypto.randomUUID();
+          }
+          return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, function(c: any) {
+            return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+          });
+        }
+      }
+
+      export class PageIDCollector extends BaseIDCollector implements DataCollector {
+        static _id: string;
+
+        collect(): any {
+          if (!PageIDCollector._id) {
+            PageIDCollector._id = PageIDCollector.uniqueId();
+          }
+          return PageIDCollector._id;
+        }
+      }
+
+
+      export class SessionIDCollector extends BaseIDCollector implements DataCollector {
+        private _id: any;
+        private key: string;
+
+        constructor(key: string) {
+          super();
+          this._id;
+          this.key = key;
+        }
+
+        collect(): any {
+          if (!this._id) {
+            var persistedValue = sessionStorage.getItem(this.key);
+            if (!persistedValue) {
+              persistedValue = SessionIDCollector.uniqueId();
+              sessionStorage.setItem(this.key, persistedValue);
+            }
+            this._id = persistedValue;
+          }
+          return this._id;
+        }
+      }
+
     }
   }
 }
