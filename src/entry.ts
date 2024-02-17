@@ -77,6 +77,12 @@ namespace Logging {
                         str += "." + classes[i];
                     }
                 }
+                if (node.hasAttribute("href")) {
+                    str += '[href="' + node.getAttribute('href') + '"]';
+                }
+                if (node.hasAttribute("src")) {
+                    str += '[src="' + node.getAttribute('src') + '"]';
+                }
                 return this.generateQuerySelector(node.parentNode as HTMLElement) + " > " + str;
             }
 

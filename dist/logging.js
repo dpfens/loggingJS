@@ -279,6 +279,12 @@ var Logging;
                         str += "." + classes[i];
                     }
                 }
+                if (node.hasAttribute("href")) {
+                    str += '[href="' + node.getAttribute('href') + '"]';
+                }
+                if (node.hasAttribute("src")) {
+                    str += '[src="' + node.getAttribute('src') + '"]';
+                }
                 return this.generateQuerySelector(node.parentNode) + " > " + str;
             };
             EventEntry.prototype.stringifyEvent = function (event) {
@@ -691,6 +697,7 @@ var Logging;
                 return _this;
             }
             EventLogger.prototype.handle = function (event) {
+                console.log(event.srcElement);
                 var entry = new Logging.entry.EventEntry(event.type.toUpperCase(), this.gatherMetadata(), event);
                 this.executeHandlers(entry);
                 return true;
