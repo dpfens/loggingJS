@@ -154,9 +154,20 @@ var Logging;
                     if (crypto && crypto.randomUUID) {
                         return crypto.randomUUID();
                     }
-                    return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, function (c) {
-                        return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16);
-                    });
+                    if (crypto.getRandomValues) {
+                        return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, function (c) {
+                            return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16);
+                        });
+                    }
+                    var uuid = "";
+                    for (var i = 0; i < 32; i++) {
+                        var random = Math.random() * 16 | 0;
+                        if (i === 8 || i === 12 || i === 16 || i === 20) {
+                            uuid += "-";
+                        }
+                        uuid += (i === 12 ? 4 : (i === 16 ? (random & 3 | 8) : random)).toString(16);
+                    }
+                    return uuid;
                 };
                 return BaseIDCollector;
             }());
